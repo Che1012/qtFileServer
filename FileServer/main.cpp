@@ -10,7 +10,8 @@ int main(int argc, char *argv[])
 
     ServerHandler *netHandler = new ServerHandler(&a);
     QObject::connect(netHandler, &ServerHandler::finished,
-                     &a,          &QCoreApplication::quit);
+                     &a, &QCoreApplication::quit);
+
 
     QTimer::singleShot(0, netHandler, SLOT(start()));
     return a.exec();

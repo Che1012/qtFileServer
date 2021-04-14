@@ -19,9 +19,9 @@ public:
 
 private slots:
     void on_sendBtn_clicked();
-
+    void receivedFromClient(QString data);
 private:
-    Ui::ClientWidget *ui;
-    ClientHandler client;
+    Ui::ClientWidget *m_ui;
+    ClientHandler m_client;
 };
 #endif // CLIENTWIDGET_H

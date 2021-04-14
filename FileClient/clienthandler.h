@@ -12,16 +12,18 @@ class ClientHandler : public QObject
 
 signals:
     void finished();
+    void received(QString data);
 public slots:
     void start();
     void stop();
     void startTransfer();
+    void receiveData();
 public:
     explicit ClientHandler(QObject* parent = nullptr);
     ~ClientHandler();
 
 private:
-    QTcpSocket *tcpSocket;
+    QTcpSocket *m_tcpSocket;
 };
 
 

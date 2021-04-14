@@ -3,18 +3,25 @@
 
 ClientWidget::ClientWidget(QWidget *parent)
     : QWidget(parent)
-    , ui(new Ui::ClientWidget)
+    , m_ui(new Ui::ClientWidget)
 {
-    ui->setupUi(this);
+    m_ui->setupUi(this);
+    connect(&m_client, &ClientHandler::received,
+            this, &ClientWidget::receivedFromClient);
 }
 
 ClientWidget::~ClientWidget()
 {
-    delete ui;
+    delete m_ui;
 }
 
 
 void ClientWidget::on_sendBtn_clicked()
 {
-    client.start();
+    m_client.start();
+}
+
+void ClientWidget::receivedFromClient(QString data)
+{
+    m_ui->textReceived->setText(data);
 }
