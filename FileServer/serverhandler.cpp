@@ -91,14 +91,26 @@ void ServerHandler::checkCommand()
 void ServerHandler::checkRequest(TCPRequest request)
 {
     switch (request) {
-    case SendFilesList:
-        return;;
-    case Echo:
+    case SendFilesList: {
+        QDir currentDir = QDir::current();
+        currentDir.setFilter(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
+        QFileInfoList list = currentDir.entryInfoList();
+        QString resList(QDir::currentPath() + "\n");
+        for (int i = 0; i < list.size(); i++)
+            resList += list.at(i).fileName() + "\n";
+        startTransfer(resList);
+        qDebug() << resList;
+        break;
+    }
+    case Echo: {
         QString value("echo");
         startTransfer(value);
-        return;;
+        break;
     }
-    qDebug("Tcp request is wrong");
+    default:
+        qDebug("Tcp request is wrong");
+        break;
+    }
 }
 
 ServerHandler::Command ServerHandler::toCommand(const QString &cmd)

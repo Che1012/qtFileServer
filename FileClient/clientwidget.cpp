@@ -1,3 +1,5 @@
+#include <QTreeWidget>
+
 #include "clientwidget.h"
 #include "ui_clientwidget.h"
 
@@ -10,6 +12,7 @@ ClientWidget::ClientWidget(QWidget *parent)
             this, &ClientWidget::receivedFromClient);
     connect(this, &ClientWidget::sendData,
             &m_client, &ClientHandler::startTransfer);
+    updateTreeWidget(QStringList());
 }
 
 ClientWidget::~ClientWidget()
@@ -32,4 +35,12 @@ void ClientWidget::receivedFromClient(QString data)
 void ClientWidget::on_connectBtn_clicked()
 {
     m_client.start();
+}
+
+void ClientWidget::updateTreeWidget(const QStringList &list)
+{
+//    QTreeWidgetItem *treeItem = new QTreeWidgetItem(m_ui->treeWidget);
+//    treeItem->setText(0, "Name");
+//    treeItem->setText(1, "Size");
+//    treeItem->setText(2, "Status");
 }
