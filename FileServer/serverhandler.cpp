@@ -1,5 +1,5 @@
 #include "QTextCodec"
-
+#include "QDir"
 #include "serverhandler.h"
 
 void ServerHandler::start()
@@ -13,6 +13,8 @@ void ServerHandler::start()
 void ServerHandler::stop()
 {
     qDebug() << "ServerHandler stopped";
+    if (m_tcpServerConnection->isOpen())
+        m_tcpServerConnection->close();
     emit finished();
     deleteLater();
 }
@@ -41,8 +43,14 @@ void ServerHandler::updateServer()
     QByteArray barray = m_tcpServerConnection->readAll();
 
     //codecForMib(106) - UTF-8
-    qDebug() << "Received:" << QTextCodec::codecForMib(106)->toUnicode(barray);
-    m_tcpServerConnection->close();
+    QString receivedStr = QTextCodec::codecForMib(106)->toUnicode(barray);
+    qDebug() << "Received:" << receivedStr;
+
+    QTextStream receivedStream(&receivedStr);
+    int cmdNum;
+    receivedStream >> cmdNum;
+    qDebug() << "cmdNum" << cmdNum;
+    checkRequest(static_cast<TCPRequest>(cmdNum));
 }
 
 void ServerHandler::displayError(QAbstractSocket::SocketError socketError)
@@ -58,31 +66,56 @@ void ServerHandler::onClientDisconnect()
 
 void ServerHandler::checkCommand()
 {
-    QTextStream stream(m_input);
+    QTextStream stream(stdin);
     QString cmd;
     QString value;
-    stream >> cmd >> value;
+    stream >> cmd;
     Command command = toCommand(cmd);
 
     switch (command) {
     case SendValue:
+        stream >> value;
         startTransfer(value);
+        break;
+    case Exit:
+        stop();
         break;
     case NotCommand:
         qDebug() << "Not a command, try another one..";
         break;
     }
+
+    qDebug() << "Command" << cmd << value;
+}
+
+void ServerHandler::checkRequest(TCPRequest request)
+{
+    switch (request) {
+    case SendFilesList:
+        return;;
+    case Echo:
+        QString value("echo");
+        startTransfer(value);
+        return;;
+    }
+    qDebug("Tcp request is wrong");
 }
 
 ServerHandler::Command ServerHandler::toCommand(const QString &cmd)
 {
-    if (cmd == "--send")
+    if (cmd == "send")
         return SendValue;
+    if (cmd == "exit")
+        return Exit;
     return NotCommand;
 }
 
 void ServerHandler::startTransfer(const QString &value)
 {
+    if (m_tcpServerConnection == nullptr || !m_tcpServerConnection->isOpen()) {
+        qDebug() << "Connection is not established";
+        return;
+    }
     m_tcpServerConnection->write(value.toUtf8());
 }
 
@@ -92,10 +125,9 @@ ServerHandler::ServerHandler(QObject* parent) : QObject(parent)
     connect(m_tcpServer, &QTcpServer::newConnection,
             this, &ServerHandler::acceptConnection);
 
-    QFile* m_input = new QFile();
-    m_input ->open(stdin, QFile::ReadOnly);
+    m_input = new QSocketNotifier(fileno(stdin), QSocketNotifier::Read, this);
 
-    QObject::connect(m_input , &QIODevice::readyRead,
+    QObject::connect(m_input, &QSocketNotifier::activated,
                      this, &ServerHandler::checkCommand);
 }
 
@@ -103,7 +135,6 @@ ServerHandler::~ServerHandler()
 {
     delete  m_tcpServer;
 
-    m_input->close();
     delete  m_input;
     qDebug() << "ServerHandler deleted";
 }

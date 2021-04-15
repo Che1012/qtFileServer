@@ -4,16 +4,23 @@
 #include <QtNetwork/QTcpServer>
 #include <QtNetwork/QTcpSocket>
 #include <QObject>
+#include <QSocketNotifier>
 #include <QFile>
 
 class ServerHandler : public QObject
 {
     Q_OBJECT
 public:
+    enum TCPRequest
+    {
+        SendFilesList = 200,
+        Echo
+    };
     enum Command
     {
         SendValue,
-        NotCommand
+        NotCommand,
+        Exit
     };
 
 signals:
@@ -29,6 +36,7 @@ public slots:
     void onClientDisconnect();
 
     void checkCommand();
+    void checkRequest(TCPRequest request);
 public:
     explicit ServerHandler(QObject* parent = nullptr);
     ~ServerHandler();
@@ -38,7 +46,7 @@ public:
 private:
     QTcpServer *m_tcpServer = nullptr;
     QTcpSocket *m_tcpServerConnection = nullptr;
-    QFile* m_input = nullptr;
+    QSocketNotifier *m_input = nullptr;
 };
 
 

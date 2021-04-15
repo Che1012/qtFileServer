@@ -8,6 +8,8 @@ ClientWidget::ClientWidget(QWidget *parent)
     m_ui->setupUi(this);
     connect(&m_client, &ClientHandler::received,
             this, &ClientWidget::receivedFromClient);
+    connect(this, &ClientWidget::sendData,
+            &m_client, &ClientHandler::startTransfer);
 }
 
 ClientWidget::~ClientWidget()
@@ -18,10 +20,16 @@ ClientWidget::~ClientWidget()
 
 void ClientWidget::on_sendBtn_clicked()
 {
-    m_client.start();
+    emit sendData(m_ui->textToSend->toPlainText());
 }
 
 void ClientWidget::receivedFromClient(QString data)
 {
-    m_ui->textReceived->setText(data);
+    QString str = m_ui->textReceived->toPlainText() + "\n" + data;
+    m_ui->textReceived->setText(str);
+}
+
+void ClientWidget::on_connectBtn_clicked()
+{
+    m_client.start();
 }

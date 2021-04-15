@@ -14,13 +14,13 @@
    <string>ClientWidget</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
-   <item row="1" column="1">
+   <item row="2" column="1">
     <widget class="QTextEdit" name="textToSend"/>
    </item>
    <item row="0" column="1">
-    <widget class="QTextEdit" name="textReceived"/>
+    <widget class="QTextBrowser" name="textReceived"/>
    </item>
-   <item row="1" column="0">
+   <item row="2" column="0">
     <widget class="QPushButton" name="sendBtn">
      <property name="text">
       <string>Send</string>
@@ -31,6 +31,13 @@
     <widget class="QLabel" name="receivedLabel">
      <property name="text">
       <string>Received</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QPushButton" name="connectBtn">
+     <property name="text">
+      <string>Connect</string>
      </property>
     </widget>
    </item>

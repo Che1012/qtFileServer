@@ -17,9 +17,13 @@ public:
     ClientWidget(QWidget *parent = nullptr);
     ~ClientWidget();
 
+signals:
+    void sendData(QString data);
 private slots:
     void on_sendBtn_clicked();
     void receivedFromClient(QString data);
+    void on_connectBtn_clicked();
+
 private:
     Ui::ClientWidget *m_ui;
     ClientHandler m_client;

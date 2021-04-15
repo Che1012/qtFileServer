@@ -16,9 +16,9 @@ void ClientHandler::stop()
 
 }
 
-void ClientHandler::startTransfer()
+void ClientHandler::startTransfer(QString data)
 {
-    m_tcpSocket->write(QByteArray("Hello World!"));
+    m_tcpSocket->write(data.toUtf8());
 }
 
 void ClientHandler::receiveData()
@@ -26,16 +26,14 @@ void ClientHandler::receiveData()
     QByteArray barray = m_tcpSocket->readAll();
     //codecForMib(106) - UTF-8
     QString data = QTextCodec::codecForMib(106)->toUnicode(barray);
+    qDebug() << "Received size:" << data.size();
     qDebug() << "Received:" << data;
-    qDebug() << sizeof(data);
     emit received(data);
 }
 
 ClientHandler::ClientHandler(QObject *parent)
 {
     m_tcpSocket = new QTcpSocket();
-    connect(m_tcpSocket, &QAbstractSocket::connected,
-            this,      &ClientHandler::startTransfer);
 }
 
 ClientHandler::~ClientHandler()

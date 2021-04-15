@@ -16,7 +16,7 @@ signals:
 public slots:
     void start();
     void stop();
-    void startTransfer();
+    void startTransfer(QString data);
     void receiveData();
 public:
     explicit ClientHandler(QObject* parent = nullptr);
