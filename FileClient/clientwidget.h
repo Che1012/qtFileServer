@@ -19,11 +19,12 @@ public:
 
 signals:
     void sendData(QString data);
+
 private slots:
     void on_sendBtn_clicked();
     void receivedFromClient(QString data);
     void on_connectBtn_clicked();
-    void updateTreeWidget(const QStringList &list);
+    void updateTreeWidget(QTreeWidgetItem *root);
 private:
     Ui::ClientWidget *m_ui;
     ClientHandler m_client;

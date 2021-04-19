@@ -12,7 +12,8 @@ ClientWidget::ClientWidget(QWidget *parent)
             this, &ClientWidget::receivedFromClient);
     connect(this, &ClientWidget::sendData,
             &m_client, &ClientHandler::startTransfer);
-    updateTreeWidget(QStringList());
+    connect(&m_client, &ClientHandler::treeCreated,
+            this, &ClientWidget::receivedFromClient);
 }
 
 ClientWidget::~ClientWidget()

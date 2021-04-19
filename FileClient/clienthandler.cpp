@@ -29,6 +29,11 @@ void ClientHandler::receiveData()
     qDebug() << "Received size:" << data.size();
     qDebug() << "Received:" << data;
     emit received(data);
+    QList
+    if (createFileTree(rootItem))
+        emit treeCreated(rootItem);
+    else
+        delete
 }
 
 ClientHandler::ClientHandler(QObject *parent)
@@ -39,4 +44,9 @@ ClientHandler::ClientHandler(QObject *parent)
 ClientHandler::~ClientHandler()
 {
     delete m_tcpSocket;
+}
+
+bool ClientHandler::createFileTree(QTreeWidgetItem *rootItem)
+{
+
 }

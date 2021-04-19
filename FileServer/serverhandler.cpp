@@ -1,6 +1,6 @@
 #include "QTextCodec"
-#include "QDir"
 #include "serverhandler.h"
+#include "fileinfo.h"
 
 void ServerHandler::start()
 {
@@ -79,7 +79,7 @@ void ServerHandler::checkCommand()
         break;
     case Exit:
         stop();
-        break;
+        break; 
     case NotCommand:
         qDebug() << "Not a command, try another one..";
         break;
@@ -92,14 +92,9 @@ void ServerHandler::checkRequest(TCPRequest request)
 {
     switch (request) {
     case SendFilesList: {
-        QDir currentDir = QDir::current();
-        currentDir.setFilter(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
-        QFileInfoList list = currentDir.entryInfoList();
-        QString resList(QDir::currentPath() + "\n");
-        for (int i = 0; i < list.size(); i++)
-            resList += list.at(i).fileName() + "\n";
-        startTransfer(resList);
-        qDebug() << resList;
+        QString files = FileInfo::FileInfo::getAllFiles(QDir::currentPath(), "");
+        startTransfer(files);
+        qDebug() << files;
         break;
     }
     case Echo: {
@@ -112,6 +107,7 @@ void ServerHandler::checkRequest(TCPRequest request)
         break;
     }
 }
+
 
 ServerHandler::Command ServerHandler::toCommand(const QString &cmd)
 {
