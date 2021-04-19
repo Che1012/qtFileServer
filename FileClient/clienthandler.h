@@ -5,6 +5,8 @@
 #include <QtNetwork/QTcpSocket>
 #include <QTreeWidgetItem>
 
+#include "../FileServer/fileinfo.h"
+
 static const int PayloadSize = 64 * 1024; // 64 KB
 
 class ClientHandler : public QObject
@@ -14,12 +16,12 @@ public:
     explicit ClientHandler(QObject* parent = nullptr);
             ~ClientHandler();
 
-    bool createFileTree(QTreeWidgetItem *rootItem);
+    bool createFileTree(QList<FileInfo> *fileList);
 
 signals:
     void finished();
     void received(QString data);
-    void treeCreated(QTreeWidgetItem *root);
+    void filesReceived(QList<FileInfo> *fileList);
 
 public slots:
     void start();

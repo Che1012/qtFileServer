@@ -92,9 +92,11 @@ void ServerHandler::checkRequest(TCPRequest request)
 {
     switch (request) {
     case SendFilesList: {
-        QString files = FileInfo::FileInfo::getAllFiles(QDir::currentPath(), "");
-        startTransfer(files);
-        qDebug() << files;
+        QList<FileInfo> fileList;
+        FileInfo::getFilesList(&fileList, QDir::currentPath(), "");
+
+        QDataStream dataStream(m_tcpServerConnection);
+        dataStream << fileList;
         break;
     }
     case Echo: {

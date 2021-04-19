@@ -1,8 +1,8 @@
 #include <QtNetwork/QHostAddress>
-#include "QTextCodec"
+#include <QTextCodec>
+#include <QDataStream>
 
 #include "clienthandler.h"
-
 
 void ClientHandler::start()
 {
@@ -23,17 +23,24 @@ void ClientHandler::startTransfer(QString data)
 
 void ClientHandler::receiveData()
 {
-    QByteArray barray = m_tcpSocket->readAll();
+//    QByteArray barray = m_tcpSocket->readAll();
     //codecForMib(106) - UTF-8
-    QString data = QTextCodec::codecForMib(106)->toUnicode(barray);
-    qDebug() << "Received size:" << data.size();
-    qDebug() << "Received:" << data;
-    emit received(data);
-    QList
-    if (createFileTree(rootItem))
-        emit treeCreated(rootItem);
-    else
-        delete
+    QDataStream dataStream(m_tcpSocket);
+
+    QList<FileInfo> *fileList = new QList<FileInfo>();
+
+    QString res;
+    dataStream >> *fileList;
+
+    for(FileInfo info: *fileList)
+        res += info.toStr() + "\n";
+//    QList
+//    if (createFileTree(rootItem))
+//        emit treeCreated(rootItem);
+//    else
+//        delete
+    emit received(res);
+    emit filesReceived(fileList);
 }
 
 ClientHandler::ClientHandler(QObject *parent)
@@ -46,7 +53,3 @@ ClientHandler::~ClientHandler()
     delete m_tcpSocket;
 }
 
-bool ClientHandler::createFileTree(QTreeWidgetItem *rootItem)
-{
-
-}

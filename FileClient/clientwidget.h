@@ -24,7 +24,8 @@ private slots:
     void on_sendBtn_clicked();
     void receivedFromClient(QString data);
     void on_connectBtn_clicked();
-    void updateTreeWidget(QTreeWidgetItem *root);
+    void updateTreeWidget(QList<FileInfo> *fileList);
+
 private:
     Ui::ClientWidget *m_ui;
     ClientHandler m_client;

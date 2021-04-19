@@ -22,6 +22,7 @@ public:
         Exit
     };
 
+
     explicit ServerHandler(QObject* parent = nullptr);
             ~ServerHandler();
 

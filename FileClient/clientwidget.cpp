@@ -12,8 +12,8 @@ ClientWidget::ClientWidget(QWidget *parent)
             this, &ClientWidget::receivedFromClient);
     connect(this, &ClientWidget::sendData,
             &m_client, &ClientHandler::startTransfer);
-    connect(&m_client, &ClientHandler::treeCreated,
-            this, &ClientWidget::receivedFromClient);
+    connect(&m_client, &ClientHandler::filesReceived,
+            this, &ClientWidget::updateTreeWidget);
 }
 
 ClientWidget::~ClientWidget()
@@ -38,10 +38,19 @@ void ClientWidget::on_connectBtn_clicked()
     m_client.start();
 }
 
-void ClientWidget::updateTreeWidget(const QStringList &list)
+void ClientWidget::updateTreeWidget(QList<FileInfo> *fileList)
 {
-//    QTreeWidgetItem *treeItem = new QTreeWidgetItem(m_ui->treeWidget);
-//    treeItem->setText(0, "Name");
-//    treeItem->setText(1, "Size");
-//    treeItem->setText(2, "Status");
+    for(FileInfo info : *fileList) {
+        info.getName().split("/");
+        QTreeWidgetItem *treeItem = new QTreeWidgetItem(m_ui->treeWidget);
+    }
+    delete fileList;
 }
+
+//void ClientWidget::updateTreeWidget(const QStringList &list)
+//{
+////    QTreeWidgetItem *treeItem = new QTreeWidgetItem(m_ui->treeWidget);
+////    treeItem->setText(0, "Name");
+////    treeItem->setText(1, "Size");
+////    treeItem->setText(2, "Status");
+//}
