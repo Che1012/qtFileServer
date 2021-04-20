@@ -14,12 +14,13 @@ public:
     static void getFilesList(QList<FileInfo> *fileList,
                              QString path, QString root);
 
-    QString toStr();
-
     friend QDataStream& operator<<(QDataStream& stream, const FileInfo &fileInfo);
     friend QDataStream& operator>>(QDataStream& stream, FileInfo &fileInfo);
 
     friend bool operator==(const FileInfo& left, const FileInfo& right);
+
+    QString toStr();
+    bool isUpToDate(const FileInfo &compared);
 
     QString getName() const;
     void setName(const QString &value);

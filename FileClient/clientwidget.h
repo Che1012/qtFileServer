@@ -15,9 +15,12 @@ class ClientWidget : public QWidget
     Q_OBJECT
 
 public:
-    const int NAME_COLUMN = 0;
-    const int SIZE_COLUMN = 1;
-    const int DATE_COLUMN = 2;
+    enum Column {
+        Name,
+        Size,
+        Date,
+        Status
+    };
     const int CHILD_NOT_FOUND = -1;
 
     ClientWidget(QWidget *parent = nullptr);
@@ -35,8 +38,10 @@ private slots:
 private:
     Ui::ClientWidget *m_ui;
     ClientHandler m_client;
+    QList<FileInfo>* currFileInfoList = nullptr;
 
-    bool addTreeNode(QTreeWidgetItem* parent, FileInfo& node, int level);
-    int  getTreeChild(QTreeWidgetItem* parent, QString nodeName);
+    bool checkTreeNode(QList<FileInfo> *prevList, FileInfo &node);
+    bool addTreeNode(QTreeWidgetItem *parent, FileInfo &node, int level);
+    int  getTreeChild(QTreeWidgetItem *parent, QString nodeName);
 };
 #endif // CLIENTWIDGET_H

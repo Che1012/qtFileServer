@@ -1,4 +1,6 @@
 #include <QTreeWidget>
+#include <QDir>
+
 
 #include "clientwidget.h"
 #include "ui_clientwidget.h"
@@ -40,6 +42,11 @@ void ClientWidget::on_connectBtn_clicked()
 
 void ClientWidget::updateTreeWidget(QList<FileInfo> *fileList)
 {
+    if (currFileInfoList != nullptr)
+        delete currFileInfoList;
+    currFileInfoList = new QList<FileInfo>();
+    FileInfo::getFilesList(currFileInfoList, QDir::currentPath(), "");
+
     QTreeWidgetItem* treeRoot = m_ui->treeWidget->takeTopLevelItem(0);
     if (treeRoot != nullptr)
         delete treeRoot;
@@ -50,6 +57,21 @@ void ClientWidget::updateTreeWidget(QList<FileInfo> *fileList)
             qDebug() << "Error at creating tree";
     treeRoot->setExpanded(true);
     delete fileList;
+}
+
+// returns true if file is up to date
+bool ClientWidget::checkTreeNode(QList<FileInfo> *prevList, FileInfo &node)
+{
+    if (prevList == nullptr)
+        return false;
+    for (FileInfo temp : *prevList)
+        if (temp == node) {
+            if (temp.isUpToDate(node))
+                return true;
+            else
+                return false;
+        }
+    return false;
 }
 
 bool ClientWidget::addTreeNode(QTreeWidgetItem* parent, FileInfo &node, int level)
@@ -66,9 +88,13 @@ bool ClientWidget::addTreeNode(QTreeWidgetItem* parent, FileInfo &node, int leve
             item = new QTreeWidgetItem(parent);
         else
             item = parent->child(childPos);
-        item->setText(NAME_COLUMN, nodeSubName);
-        item->setText(SIZE_COLUMN, QString::number(node.getSize()));
-        item->setText(DATE_COLUMN, node.getDate().toString());
+        item->setText(Column::Name, nodeSubName);
+        item->setText(Column::Size, QString::number(node.getSize()));
+        item->setText(Column::Date, node.getDate().toString());
+        if (checkTreeNode(currFileInfoList, node))
+            item->setText(Column::Status, "Up to date");
+        else
+            item->setText(Column::Status, "Need update");
         return true;
     }
     // if node has more levels(subdirs)
@@ -76,7 +102,7 @@ bool ClientWidget::addTreeNode(QTreeWidgetItem* parent, FileInfo &node, int leve
         if (childPos != CHILD_NOT_FOUND)
             return addTreeNode(parent->child(childPos), node, level + 1);
         QTreeWidgetItem* item = new QTreeWidgetItem(parent);
-        item->setText(NAME_COLUMN, nodeSubName);
+        item->setText(Column::Name, nodeSubName);
         return addTreeNode(item, node, level + 1);
     }
     return false;
@@ -85,16 +111,8 @@ bool ClientWidget::addTreeNode(QTreeWidgetItem* parent, FileInfo &node, int leve
 int ClientWidget::getTreeChild(QTreeWidgetItem *parent, QString nodeName)
 {
     for (int i = 0; i < parent->childCount(); i++) {
-        if (parent->child(i)->text(NAME_COLUMN) == nodeName)
+        if (parent->child(i)->text(Column::Name) == nodeName)
             return i;
     }
     return -1;
 }
-
-//void ClientWidget::updateTreeWidget(const QStringList &list)
-//{
-////    QTreeWidgetItem *treeItem = new QTreeWidgetItem(m_ui->treeWidget);
-////    treeItem->setText(0, "Name");
-////    treeItem->setText(1, "Size");
-////    treeItem->setText(2, "Status");
-//}

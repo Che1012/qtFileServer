@@ -61,13 +61,13 @@ QDataStream& operator>>(QDataStream& stream, FileInfo &fileInfo)
 }
 bool operator==(const FileInfo& left, const FileInfo& right)
 {
-    if (left.date == right.date &&
-        left.name == right.name &&
+    if (left.name == right.name &&
         left.size == right.size)
         return true;
     return false;
 }
 // writes all files from path to the stream
+// !! before calling this function need to create QList<FileInfo> *fileList
 // as separator takes QString separator
 // QString root used to set root dir to display in result string
 //
@@ -104,4 +104,11 @@ void FileInfo::getFilesList(QList<FileInfo> *fileList, QString path, QString roo
 QString FileInfo::toStr()
 {
     return name + " " + QString::number(size) + " " + date.toString();
+}
+
+bool FileInfo::isUpToDate(const FileInfo &compared)
+{
+    if (this->date > compared.date)
+        return true;
+    return false;
 }
