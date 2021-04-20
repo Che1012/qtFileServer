@@ -40,11 +40,55 @@ void ClientWidget::on_connectBtn_clicked()
 
 void ClientWidget::updateTreeWidget(QList<FileInfo> *fileList)
 {
-    for(FileInfo info : *fileList) {
-        info.getName().split("/");
-        QTreeWidgetItem *treeItem = new QTreeWidgetItem(m_ui->treeWidget);
-    }
+    QTreeWidgetItem* treeRoot = m_ui->treeWidget->takeTopLevelItem(0);
+    if (treeRoot != nullptr)
+        delete treeRoot;
+    treeRoot = new QTreeWidgetItem(m_ui->treeWidget);
+
+    for (FileInfo info : *fileList)
+        if (!addTreeNode(treeRoot, info, 0))
+            qDebug() << "Error at creating tree";
+    treeRoot->setExpanded(true);
     delete fileList;
+}
+
+bool ClientWidget::addTreeNode(QTreeWidgetItem* parent, FileInfo &node, int level)
+{
+    if (parent == nullptr)
+        return false;
+    QString nodeSubName = node.getName().split("/").at(level);
+    int     nodeNameLevels = node.getName().split("/").size();
+    int     childPos = getTreeChild(parent, nodeSubName);
+    // if it is final level of node
+    if (level == nodeNameLevels - 1) {
+        QTreeWidgetItem* item;
+        if (childPos == CHILD_NOT_FOUND)
+            item = new QTreeWidgetItem(parent);
+        else
+            item = parent->child(childPos);
+        item->setText(NAME_COLUMN, nodeSubName);
+        item->setText(SIZE_COLUMN, QString::number(node.getSize()));
+        item->setText(DATE_COLUMN, node.getDate().toString());
+        return true;
+    }
+    // if node has more levels(subdirs)
+    else if (level < nodeNameLevels - 1) {
+        if (childPos != CHILD_NOT_FOUND)
+            return addTreeNode(parent->child(childPos), node, level + 1);
+        QTreeWidgetItem* item = new QTreeWidgetItem(parent);
+        item->setText(NAME_COLUMN, nodeSubName);
+        return addTreeNode(item, node, level + 1);
+    }
+    return false;
+}
+
+int ClientWidget::getTreeChild(QTreeWidgetItem *parent, QString nodeName)
+{
+    for (int i = 0; i < parent->childCount(); i++) {
+        if (parent->child(i)->text(NAME_COLUMN) == nodeName)
+            return i;
+    }
+    return -1;
 }
 
 //void ClientWidget::updateTreeWidget(const QStringList &list)

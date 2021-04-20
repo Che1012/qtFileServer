@@ -59,7 +59,14 @@ QDataStream& operator>>(QDataStream& stream, FileInfo &fileInfo)
     fileInfo.setSize(size);
     fileInfo.setDate(date);
 }
-
+bool operator==(const FileInfo& left, const FileInfo& right)
+{
+    if (left.date == right.date &&
+        left.name == right.name &&
+        left.size == right.size)
+        return true;
+    return false;
+}
 // writes all files from path to the stream
 // as separator takes QString separator
 // QString root used to set root dir to display in result string

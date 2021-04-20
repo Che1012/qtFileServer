@@ -19,6 +19,8 @@ public:
     friend QDataStream& operator<<(QDataStream& stream, const FileInfo &fileInfo);
     friend QDataStream& operator>>(QDataStream& stream, FileInfo &fileInfo);
 
+    friend bool operator==(const FileInfo& left, const FileInfo& right);
+
     QString getName() const;
     void setName(const QString &value);
 
