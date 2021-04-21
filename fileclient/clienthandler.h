@@ -5,7 +5,7 @@
 #include <QtNetwork/QTcpSocket>
 #include <QTreeWidgetItem>
 
-#include "../FileServer/fileinfo.h"
+#include "fileinfo.h"
 
 static const int PayloadSize = 64 * 1024; // 64 KB
 
@@ -26,7 +26,7 @@ signals:
 public slots:
     void start();
     void stop();
-    void startTransfer(QString data);
+    void startTransfer(QString &data);
     void receiveData();
 
 private:

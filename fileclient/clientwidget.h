@@ -4,7 +4,7 @@
 #include <QWidget>
 
 #include "clienthandler.h"
-#include "../FileServer/fileinfo.h"
+#include "fileinfo.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class ClientWidget; }

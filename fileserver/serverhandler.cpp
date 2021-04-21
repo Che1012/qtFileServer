@@ -1,6 +1,6 @@
 #include "QTextCodec"
 #include "serverhandler.h"
-#include "fileinfo.h"
+
 
 void ServerHandler::start()
 {
@@ -50,7 +50,7 @@ void ServerHandler::updateServer()
     int cmdNum;
     receivedStream >> cmdNum;
     qDebug() << "cmdNum" << cmdNum;
-    checkRequest(static_cast<TCPRequest>(cmdNum));
+    checkRequest(static_cast<tcp::Command>(cmdNum));
 }
 
 void ServerHandler::displayError(QAbstractSocket::SocketError socketError)
@@ -70,7 +70,7 @@ void ServerHandler::checkCommand()
     QString cmd;
     QString value;
     stream >> cmd;
-    Command command = toCommand(cmd);
+    TermCommand command = toCommand(cmd);
 
     switch (command) {
     case SendValue:
@@ -88,20 +88,39 @@ void ServerHandler::checkCommand()
     qDebug() << "Command" << cmd << value;
 }
 
-void ServerHandler::checkRequest(TCPRequest request)
+void ServerHandler::checkRequest(tcp::Command request)
 {
     switch (request) {
-    case SendFilesList: {
+    case tcp::SendFilesList: {
         QList<FileInfo> fileList;
         FileInfo::getFilesList(&fileList, QDir::currentPath(), "");
 
         QDataStream dataStream(m_tcpServerConnection);
-        dataStream << fileList;
+        dataStream << static_cast<int>(tcp::FilesList) << fileList;
         break;
     }
-    case Echo: {
-        QString value("echo");
-        startTransfer(value);
+    case tcp::Echo: {
+        QString str;
+        tcp::recieveString(m_tcpServerConnection, &str);
+        QDataStream dataStream(m_tcpServerConnection);
+        dataStream << static_cast<int>(tcp::StringValue) << str;
+        break;
+    }
+    case tcp::StringValue: {
+        QString str;
+        tcp::recieveString(m_tcpServerConnection, &str);
+        qDebug() << str;
+        break;
+    }
+    case tcp::SendFile: {
+        FileInfo info;
+        tcp::recieveFileInfo(m_tcpServerConnection, &info);
+        // find file
+        // add to files pool
+        QDataStream dataStream(m_tcpServerConnection);
+        dataStream << static_cast<int>(tcp::StartFilePacket)
+                   << info;
+        // send file in for loop
         break;
     }
     default:
@@ -110,8 +129,16 @@ void ServerHandler::checkRequest(TCPRequest request)
     }
 }
 
+//void ServerHandler::sendFile(FileInfo &fileInfo)
+//{
+//    if (m_tcpServerConnection == nullptr || m_tcpServerConnection->isOpen())
+//        return;
 
-ServerHandler::Command ServerHandler::toCommand(const QString &cmd)
+//    m_tcpServerConnection->write();
+//}
+
+
+ServerHandler::TermCommand ServerHandler::toCommand(const QString &cmd)
 {
     if (cmd == "send")
         return SendValue;

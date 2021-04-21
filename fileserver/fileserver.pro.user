@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 4.14.1, 2021-04-15T19:07:14. -->
+<!-- Written by QtCreator 4.14.1, 2021-04-21T19:03:33. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -292,8 +292,8 @@
     <valuelist type="QVariantList" key="CustomOutputParsers"/>
     <value type="int" key="PE.EnvironmentAspect.Base">2</value>
     <valuelist type="QVariantList" key="PE.EnvironmentAspect.Changes"/>
-    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.Qt4RunConfiguration:/home/timin/source/qtFileServer/FileServer/FileServer.pro</value>
-    <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">/home/timin/source/qtFileServer/FileServer/FileServer.pro</value>
+    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.Qt4RunConfiguration:/home/timin/source/qtFileServer/fileserver/fileserver.pro</value>
+    <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">/home/timin/source/qtFileServer/fileserver/fileserver.pro</value>
     <value type="bool" key="RunConfiguration.UseCppDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseCppDebuggerAuto">true</value>
     <value type="bool" key="RunConfiguration.UseLibrarySearchPath">true</value>

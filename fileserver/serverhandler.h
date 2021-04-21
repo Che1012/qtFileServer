@@ -8,15 +8,14 @@
 #include <QFile>
 #include "QDir"
 
+#include "fileinfo.h"
+#include "tcppacket.h"
+
 class ServerHandler : public QObject
 {
     Q_OBJECT
 public:
-    enum TCPRequest {
-        SendFilesList = 200,
-        Echo
-    };
-    enum Command {
+    enum TermCommand {
         SendValue,
         NotCommand,
         Exit
@@ -26,7 +25,7 @@ public:
     explicit ServerHandler(QObject* parent = nullptr);
             ~ServerHandler();
 
-    Command toCommand(const QString &cmd);
+    TermCommand toCommand(const QString &cmd);
     void    startTransfer(const QString &value);
 
 signals:
@@ -42,7 +41,7 @@ public slots:
     void onClientDisconnect();
 
     void checkCommand();
-    void checkRequest(TCPRequest request);
+    void checkRequest(tcp::Command request);
 
 private:
     QTcpServer      *m_tcpServer = nullptr;

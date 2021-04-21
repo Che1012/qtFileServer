@@ -11,7 +11,8 @@ CONFIG -= app_bundle
 SOURCES += \
         fileinfo.cpp \
         main.cpp \
-        serverhandler.cpp
+        serverhandler.cpp \
+        tcppacket.cpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -20,4 +21,5 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     fileinfo.h \
-    serverhandler.h
+    serverhandler.h \
+    tcppacket.h
