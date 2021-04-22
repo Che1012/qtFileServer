@@ -56,7 +56,7 @@ QDataStream& operator<<(QDataStream& stream, const FileInfo &fileInfo)
 QDataStream& operator>>(QDataStream& stream, FileInfo &fileInfo)
 {
     QString name;
-    int     size;
+    qint64 size;
     QDateTime date;
     stream >> name >> size >> date;
     fileInfo.setName(name);
