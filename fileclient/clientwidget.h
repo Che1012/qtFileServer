@@ -28,12 +28,19 @@ public:
 
 signals:
     void sendData(QString data);
+    void sendFile(QString name);
+    void sendFilesList();
 
 private slots:
-    void on_sendBtn_clicked();
     void receivedFromClient(QString data);
     void on_connectBtn_clicked();
     void updateTreeWidget(QList<FileInfo> *fileList);
+
+    void on_fileBtn_clicked();
+
+    void on_syncBtn_clicked();
+
+    void on_echoBtn_clicked();
 
 private:
     Ui::ClientWidget *m_ui;

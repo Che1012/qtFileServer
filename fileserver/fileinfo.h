@@ -5,35 +5,36 @@
 #include <QDataStream>
 #include <QDateTime>
 
-struct FileInfo
+class FileInfo
 {
 public:
     FileInfo();
-    FileInfo(QString name, int size, QDateTime date);
+    FileInfo(QString name, qint64 size, QDateTime date);
+    FileInfo(QString name, qint64 size);
+    QString toStr() const;
 
     static void getFilesList(QList<FileInfo> *fileList,
                              QString path, QString root);
-
+    static QString string(QList<FileInfo> *fileList);
     friend QDataStream& operator<<(QDataStream& stream, const FileInfo &fileInfo);
     friend QDataStream& operator>>(QDataStream& stream, FileInfo &fileInfo);
 
     friend bool operator==(const FileInfo& left, const FileInfo& right);
 
-    QString toStr();
     bool isUpToDate(const FileInfo &compared);
 
     QString getName() const;
     void setName(const QString &value);
 
-    int getSize() const;
-    void setSize(int value);
+    qint64 getSize() const;
+    void setSize(qint64 value);
 
     QDateTime getDate() const;
     void setDate(const QDateTime &value);
 
 private:
     QString name;
-    int     size;
+    qint64 size;
     QDateTime date;
 };
 

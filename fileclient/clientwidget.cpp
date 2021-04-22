@@ -11,22 +11,24 @@ ClientWidget::ClientWidget(QWidget *parent)
 {
     m_ui->setupUi(this);
     connect(&m_client, &ClientHandler::received,
-            this, &ClientWidget::receivedFromClient);
-    connect(this, &ClientWidget::sendData,
-            &m_client, &ClientHandler::startTransfer);
+            this,      &ClientWidget::receivedFromClient);
+
+    connect(this,      &ClientWidget::sendFile,
+            &m_client, &ClientHandler::sendFileReq);
+
     connect(&m_client, &ClientHandler::filesReceived,
-            this, &ClientWidget::updateTreeWidget);
+            this,      &ClientWidget::updateTreeWidget);
+
+    connect(this,      &ClientWidget::sendFilesList,
+            &m_client, &ClientHandler::sendFileListReq);
+
+    connect(this,      &ClientWidget::sendData,
+            &m_client, &ClientHandler::sendEcho);
 }
 
 ClientWidget::~ClientWidget()
 {
     delete m_ui;
-}
-
-
-void ClientWidget::on_sendBtn_clicked()
-{
-    emit sendData(m_ui->textToSend->toPlainText());
 }
 
 void ClientWidget::receivedFromClient(QString data)
@@ -42,6 +44,7 @@ void ClientWidget::on_connectBtn_clicked()
 
 void ClientWidget::updateTreeWidget(QList<FileInfo> *fileList)
 {
+    qDebug() << "updating treeWidget";
     if (currFileInfoList != nullptr)
         delete currFileInfoList;
     currFileInfoList = new QList<FileInfo>();
@@ -115,4 +118,19 @@ int ClientWidget::getTreeChild(QTreeWidgetItem *parent, QString nodeName)
             return i;
     }
     return -1;
+}
+
+void ClientWidget::on_fileBtn_clicked()
+{
+    emit sendFile(m_ui->fileLineEdit->text());
+}
+
+void ClientWidget::on_syncBtn_clicked()
+{
+    emit sendFilesList();
+}
+
+void ClientWidget::on_echoBtn_clicked()
+{
+    emit sendData(m_ui->echoLineEdit->text());
 }

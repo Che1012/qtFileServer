@@ -3,6 +3,7 @@
 
 #include <QList>
 #include <QIODevice>
+#include <QFile>
 
 #include "fileinfo.h"
 
@@ -21,10 +22,18 @@ enum Command {
 
 Command recieveCmd(QIODevice *dev);
 
-bool recieveFileList(QIODevice *dev, QList<FileInfo> *list);
+bool recieveFilesList(QIODevice *dev, QList<FileInfo> *list);
 bool recieveString(QIODevice *dev, QString *str);
-bool recieveFile(QIODevice *dev);
-bool recieveFileInfo(QIODevice *dev, FileInfo *info);
+bool recieveFileInfo(QIODevice *dev, QString *fileName, quint64 *fileSize);
+bool recieveFileName(QIODevice *dev, QString *name);
+
+bool sendEchoPacket(QIODevice *dev, QString *value);
+bool sendStringPacket(QIODevice *dev, QString *value);
+bool sendFilesListRequest(QIODevice *dev);
+bool sendFilesList(QIODevice *dev, QList<FileInfo> *list);
+bool sendFileRequest(QIODevice *dev, QString* name);
+bool sendFile(QIODevice *dev, QFile* file, qint64 payLoad);
+
 }
 
 

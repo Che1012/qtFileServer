@@ -8,8 +8,12 @@ FileInfo::FileInfo()
 {
 }
 
-FileInfo::FileInfo(QString name, int size, QDateTime date)
+FileInfo::FileInfo(QString name, qint64 size, QDateTime date)
     : name(name), size(size), date(date)
+{
+}
+FileInfo::FileInfo(QString name, qint64 size)
+    : name(name), size(size)
 {
 }
 
@@ -23,12 +27,12 @@ void FileInfo::setName(const QString &value)
     name = value;
 }
 
-int FileInfo::getSize() const
+qint64 FileInfo::getSize() const
 {
     return size;
 }
 
-void FileInfo::setSize(int value)
+void FileInfo::setSize(qint64 value)
 {
     size = value;
 }
@@ -66,7 +70,7 @@ bool operator==(const FileInfo& left, const FileInfo& right)
         return true;
     return false;
 }
-// writes all files from path to the stream
+// writes info about all files from the path to the fileList
 // !! before calling this function need to create QList<FileInfo> *fileList
 // as separator takes QString separator
 // QString root used to set root dir to display in result string
@@ -86,7 +90,7 @@ void FileInfo::getFilesList(QList<FileInfo> *fileList, QString path, QString roo
     workingDir.setFilter(QDir::Files | QDir::NoSymLinks |
                          QDir::Dirs  | QDir::NoDotAndDotDot);
     QFileInfoList list = workingDir.entryInfoList();
-    qDebug() << "files size" << list.size();
+    qDebug() << "amount of files at" << path << list.size();
     for (int i = 0; i < list.size(); i++) {
         if (list.at(i).isDir())
             getFilesList(fileList, path + "/" + list. at(i).fileName(),
@@ -101,7 +105,15 @@ void FileInfo::getFilesList(QList<FileInfo> *fileList, QString path, QString roo
     }
 }
 
-QString FileInfo::toStr()
+QString FileInfo::string(QList<FileInfo> *fileList)
+{
+    QString res;
+    for (int i = 0; i < fileList->size(); i++)
+        res += fileList->at(i).toStr() + "\n";
+    return res;
+}
+
+QString FileInfo::toStr() const
 {
     return name + " " + QString::number(size) + " " + date.toString();
 }

@@ -6,8 +6,7 @@
 #include <QTreeWidgetItem>
 
 #include "fileinfo.h"
-
-static const int PayloadSize = 64 * 1024; // 64 KB
+#include "tcppacket.h"
 
 class ClientHandler : public QObject
 {
@@ -26,11 +25,16 @@ signals:
 public slots:
     void start();
     void stop();
-    void startTransfer(QString &data);
     void receiveData();
+    void receiveFile();
+    void sendEcho(QString value);
+    void sendFileListReq();
+    void sendFileReq(QString name);
 
 private:
     QTcpSocket *m_tcpSocket;
+    FileInfo *fileReceiving = nullptr;
+    qint64 remainingSize;
 };
 
 

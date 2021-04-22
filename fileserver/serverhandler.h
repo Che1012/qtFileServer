@@ -20,13 +20,10 @@ public:
         NotCommand,
         Exit
     };
-
+    TermCommand toCommand(const QString &cmd);
 
     explicit ServerHandler(QObject* parent = nullptr);
             ~ServerHandler();
-
-    TermCommand toCommand(const QString &cmd);
-    void    startTransfer(const QString &value);
 
 signals:
     void finished();
@@ -41,12 +38,12 @@ public slots:
     void onClientDisconnect();
 
     void checkCommand();
-    void checkRequest(tcp::Command request);
 
 private:
     QTcpServer      *m_tcpServer = nullptr;
     QTcpSocket      *m_tcpServerConnection = nullptr;
     QSocketNotifier *m_input = nullptr;
+    int              payLoad = 64 * 1024; //64Kb
 };
 
 

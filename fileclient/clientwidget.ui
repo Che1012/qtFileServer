@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
+    <width>500</width>
     <height>600</height>
    </rect>
   </property>
@@ -14,8 +14,18 @@
    <string>ClientWidget</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
-   <item row="2" column="1">
-    <widget class="QTextEdit" name="textToSend"/>
+   <item row="4" column="0">
+    <widget class="QPushButton" name="echoBtn">
+     <property name="text">
+      <string>Echo</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="1">
+    <widget class="QLineEdit" name="echoLineEdit"/>
+   </item>
+   <item row="6" column="1">
+    <widget class="QTextBrowser" name="textReceived"/>
    </item>
    <item row="1" column="0">
     <widget class="QPushButton" name="connectBtn">
@@ -24,24 +34,14 @@
      </property>
     </widget>
    </item>
+   <item row="3" column="0">
+    <widget class="QPushButton" name="fileBtn">
+     <property name="text">
+      <string>Download File</string>
+     </property>
+    </widget>
+   </item>
    <item row="0" column="1">
-    <widget class="QTextBrowser" name="textReceived"/>
-   </item>
-   <item row="2" column="0">
-    <widget class="QPushButton" name="sendBtn">
-     <property name="text">
-      <string>Send</string>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="0">
-    <widget class="QLabel" name="receivedLabel">
-     <property name="text">
-      <string>Received</string>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="2">
     <widget class="QTreeWidget" name="treeWidget">
      <column>
       <property name="text">
@@ -68,6 +68,23 @@
        <string/>
       </property>
      </column>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QPushButton" name="syncBtn">
+     <property name="text">
+      <string>Sync</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="1">
+    <widget class="QLineEdit" name="fileLineEdit"/>
+   </item>
+   <item row="6" column="0">
+    <widget class="QLabel" name="receivedLabel">
+     <property name="text">
+      <string>Received</string>
+     </property>
     </widget>
    </item>
   </layout>

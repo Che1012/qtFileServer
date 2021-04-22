@@ -3,7 +3,6 @@
 #include <QDataStream>
 
 #include "clienthandler.h"
-#include "tcppacket.h"
 
 void ClientHandler::start()
 {
@@ -17,14 +16,10 @@ void ClientHandler::stop()
 
 }
 
-void ClientHandler::startTransfer(QString &data)
-{
-    m_tcpSocket->write(data.toUtf8());
-}
-
 void ClientHandler::receiveData()
 {
     tcp::Command tcpCmd = tcp::recieveCmd(m_tcpSocket);
+    qDebug() << "tcp request:" << tcpCmd;
     switch (tcpCmd) {
     case tcp::StringValue: {
         QString str;
@@ -35,27 +30,72 @@ void ClientHandler::receiveData()
     case tcp::Echo: {
         QString str;
         tcp::recieveString(m_tcpSocket, &str);
-        QDataStream dataStream(m_tcpSocket);
-        dataStream << static_cast<int>(tcp::StringValue) << str;
-        }
+        tcp::sendStringPacket(m_tcpSocket, &str);
         break;
-    case tcp::StartFilePacket:
+    }
+    case tcp::StartFilePacket: {
+        QString fileName;
+        quint64 fileSize;
+        tcp::recieveFileInfo(m_tcpSocket, &fileName, &fileSize);
+        fileReceiving = new FileInfo(fileName, fileSize);
+        remainingSize = fileSize;
+        disconnect(m_tcpSocket, &QIODevice::readyRead,
+                   this, &ClientHandler::receiveData);
+        connect(m_tcpSocket, &QIODevice::readyRead,
+                this, &ClientHandler::receiveFile);
         break;
-    case tcp::FilePacket:
-        break;
+    }
     case tcp::FilesList: {
         QList<FileInfo> *fileList = new QList<FileInfo>();
-        tcp::recieveFileList(m_tcpSocket, fileList);
+        tcp::recieveFilesList(m_tcpSocket, fileList);
         emit filesReceived(fileList);
-    }
         break;
+    }
     default:
         emit received("Tcp request is wrong");
         break;
     }
 }
 
+void ClientHandler::receiveFile()
+{
+    QFile file(fileReceiving->getName());
+    if (!file.exists()) {
+        if (!file.open(QFile::WriteOnly))
+            return;
+    }
+    else if (!file.open(QFile::Append))
+        return;
+    QByteArray byteArray = m_tcpSocket->readAll();
+
+    remainingSize -= byteArray.size();
+    file.write(byteArray);
+    file.close();
+    if (remainingSize <= 0) {
+        disconnect(m_tcpSocket, &QIODevice::readyRead,
+                this, &ClientHandler::receiveFile);
+        connect(m_tcpSocket, &QIODevice::readyRead,
+                   this, &ClientHandler::receiveData);
+    }
+}
+
+void ClientHandler::sendEcho(QString value)
+{
+    tcp::sendEchoPacket(m_tcpSocket, &value);
+}
+
+void ClientHandler::sendFileListReq()
+{
+    tcp::sendFilesListRequest(m_tcpSocket);
+}
+
+void ClientHandler::sendFileReq(QString name)
+{
+    tcp::sendFileRequest(m_tcpSocket, &name);
+}
+
 ClientHandler::ClientHandler(QObject *parent)
+    : QObject(parent)
 {
     m_tcpSocket = new QTcpSocket();
 }
