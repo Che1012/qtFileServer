@@ -22,8 +22,10 @@ public:
     };
     TermCommand toCommand(const QString &cmd);
 
-    explicit ServerHandler(QObject* parent = nullptr);
-            ~ServerHandler();
+    explicit ServerHandler(QObject* parent = nullptr,
+                           QString filesDirPath = QDir::currentPath());
+    void init();
+    ~ServerHandler();
 
 signals:
     void finished();
@@ -40,10 +42,12 @@ public slots:
     void checkCommand();
 
 private:
+    QString         filesDirPath;
     QTcpServer      *m_tcpServer = nullptr;
     QTcpSocket      *m_tcpServerConnection = nullptr;
     QSocketNotifier *m_input = nullptr;
-    int              payLoad = 64 * 1024; //64Kb
+    int              payLoadSize = 64 * 1024; //64Kb
+
 };
 
 

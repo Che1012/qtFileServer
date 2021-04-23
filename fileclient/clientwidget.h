@@ -42,6 +42,8 @@ private slots:
 
     void on_echoBtn_clicked();
 
+    void showContextMenu(const QPoint &pos);
+
 private:
     Ui::ClientWidget *m_ui;
     ClientHandler m_client;
@@ -50,5 +52,7 @@ private:
     bool checkTreeNode(QList<FileInfo> *prevList, FileInfo &node);
     bool addTreeNode(QTreeWidgetItem *parent, FileInfo &node, int level);
     int  getTreeChild(QTreeWidgetItem *parent, QString nodeName);
+
+    void updateTreeNode(QTreeWidgetItem *node);
 };
 #endif // CLIENTWIDGET_H

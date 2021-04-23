@@ -52,6 +52,7 @@ QDataStream& operator<<(QDataStream& stream, const FileInfo &fileInfo)
     stream << fileInfo.name
            << fileInfo.size
            << fileInfo.date;
+    return stream;
 }
 QDataStream& operator>>(QDataStream& stream, FileInfo &fileInfo)
 {
@@ -62,6 +63,7 @@ QDataStream& operator>>(QDataStream& stream, FileInfo &fileInfo)
     fileInfo.setName(name);
     fileInfo.setSize(size);
     fileInfo.setDate(date);
+    return stream;
 }
 bool operator==(const FileInfo& left, const FileInfo& right)
 {

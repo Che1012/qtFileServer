@@ -8,7 +8,13 @@ int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
 
-    ServerHandler *netHandler = new ServerHandler(&a);
+    QString dirPath;
+    if (argc == 2)
+        dirPath = QString(argv[2]);
+    else
+        dirPath = QDir::currentPath();
+    ServerHandler *netHandler = new ServerHandler(&a, dirPath);
+    netHandler->init();
     QObject::connect(netHandler, &ServerHandler::finished,
                      &a, &QCoreApplication::quit);
 

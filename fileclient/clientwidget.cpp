@@ -1,5 +1,6 @@
 #include <QTreeWidget>
 #include <QDir>
+#include <QMenu>
 
 
 #include "clientwidget.h"
@@ -24,6 +25,10 @@ ClientWidget::ClientWidget(QWidget *parent)
 
     connect(this,      &ClientWidget::sendData,
             &m_client, &ClientHandler::sendEcho);
+
+    m_ui->treeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(m_ui->treeWidget, &QWidget::customContextMenuRequested,
+            this,             &ClientWidget::showContextMenu);
 }
 
 ClientWidget::~ClientWidget()
@@ -48,7 +53,10 @@ void ClientWidget::updateTreeWidget(QList<FileInfo> *fileList)
     if (currFileInfoList != nullptr)
         delete currFileInfoList;
     currFileInfoList = new QList<FileInfo>();
-    FileInfo::getFilesList(currFileInfoList, QDir::currentPath(), "");
+    /////TO-DO Remove from here
+    m_client.setWorkingDirName(m_ui->dirLineEdit->text());
+    /////
+    FileInfo::getFilesList(currFileInfoList, m_ui->dirLineEdit->text(), "");
 
     QTreeWidgetItem* treeRoot = m_ui->treeWidget->takeTopLevelItem(0);
     if (treeRoot != nullptr)
@@ -120,6 +128,17 @@ int ClientWidget::getTreeChild(QTreeWidgetItem *parent, QString nodeName)
     return -1;
 }
 
+void ClientWidget::updateTreeNode(QTreeWidgetItem *node)
+{
+    QString fileName;
+    while (node->parent() != nullptr) {
+        fileName += node->text(Column::Name);
+        node = node->parent();
+    }
+    qDebug() << "updating tree node" << fileName;
+    emit sendFile(fileName);
+}
+
 void ClientWidget::on_fileBtn_clicked()
 {
     emit sendFile(m_ui->fileLineEdit->text());
@@ -133,4 +152,27 @@ void ClientWidget::on_syncBtn_clicked()
 void ClientWidget::on_echoBtn_clicked()
 {
     emit sendData(m_ui->echoLineEdit->text());
+}
+
+void ClientWidget::showContextMenu(const QPoint &pos)
+{
+    // for most widgets
+        QPoint globalPos = m_ui->treeWidget->mapToGlobal(pos);
+        // for QAbstractScrollArea and derived classes you would use:
+        // QPoint globalPos = myWidget->viewport()->mapToGlobal(pos);
+
+        QMenu myMenu;
+        myMenu.addAction("Update");
+
+        QAction* selectedItem = myMenu.exec(globalPos);
+        if (selectedItem) {
+            if (selectedItem->text() == "Update") {
+                qDebug() << "selected tree widget item"
+                         << m_ui->treeWidget->currentItem()->text(Column::Name);
+                updateTreeNode(m_ui->treeWidget->currentItem());
+            }
+        }
+        else {
+            // nothing was chosen
+        }
 }

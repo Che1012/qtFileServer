@@ -64,7 +64,7 @@ void ServerHandler::updateServer()
         tcp::recieveFileName(m_tcpServerConnection, &fileName);
         qDebug() << "preparing to find file:" << fileName;
         QFile file(fileName);
-        tcp::sendFile(m_tcpServerConnection, &file, payLoad);
+        tcp::sendFile(m_tcpServerConnection, &file, payLoadSize);
         break;
     }
     default:
@@ -108,16 +108,7 @@ void ServerHandler::checkCommand()
     qDebug() << "Command" << cmd << value;
 }
 
-ServerHandler::TermCommand ServerHandler::toCommand(const QString &cmd)
-{
-    if (cmd == "send")
-        return SendValue;
-    if (cmd == "exit")
-        return Exit;
-    return NotCommand;
-}
-
-ServerHandler::ServerHandler(QObject* parent) : QObject(parent)
+void ServerHandler::init()
 {
     m_tcpServer = new QTcpServer();
     connect(m_tcpServer, &QTcpServer::newConnection,
@@ -127,6 +118,21 @@ ServerHandler::ServerHandler(QObject* parent) : QObject(parent)
 
     QObject::connect(m_input, &QSocketNotifier::activated,
                      this, &ServerHandler::checkCommand);
+}
+
+ServerHandler::TermCommand ServerHandler::toCommand(const QString &cmd)
+{
+    if (cmd == "send")
+        return SendValue;
+    if (cmd == "exit")
+        return Exit;
+    return NotCommand;
+}
+
+ServerHandler::ServerHandler(QObject *parent, QString filesDirPath)
+    : QObject(parent),
+      filesDirPath(filesDirPath)
+{
 }
 
 ServerHandler::~ServerHandler()

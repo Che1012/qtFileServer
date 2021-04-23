@@ -59,7 +59,7 @@ void ClientHandler::receiveData()
 
 void ClientHandler::receiveFile()
 {
-    QFile file(fileReceiving->getName());
+    QFile file(workingDirName + fileReceiving->getName());
     if (!file.exists()) {
         if (!file.open(QFile::WriteOnly))
             return;
@@ -89,9 +89,19 @@ void ClientHandler::sendFileListReq()
     tcp::sendFilesListRequest(m_tcpSocket);
 }
 
-void ClientHandler::sendFileReq(QString name)
+void ClientHandler::sendFileReq(QString fileName)
 {
-    tcp::sendFileRequest(m_tcpSocket, &name);
+    tcp::sendFileRequest(m_tcpSocket, &fileName);
+}
+
+QString ClientHandler::getWorkingDirName() const
+{
+    return workingDirName;
+}
+
+void ClientHandler::setWorkingDirName(const QString &value)
+{
+    workingDirName = value;
 }
 
 ClientHandler::ClientHandler(QObject *parent)
