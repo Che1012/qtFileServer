@@ -1,6 +1,7 @@
 #include <QtNetwork/QHostAddress>
 #include <QTextCodec>
 #include <QDataStream>
+#include <QDir>
 
 #include "clienthandler.h"
 
@@ -39,6 +40,11 @@ void ClientHandler::receiveData()
         tcp::recieveFileInfo(m_tcpSocket, &fileName, &fileSize);
         fileReceiving = new FileInfo(fileName, fileSize);
         remainingSize = fileSize;
+
+        QFile file(workingDirName + "/" + fileName);
+        file.open(QFile::WriteOnly);
+        file.close();
+
         disconnect(m_tcpSocket, &QIODevice::readyRead,
                    this, &ClientHandler::receiveData);
         connect(m_tcpSocket, &QIODevice::readyRead,
@@ -59,12 +65,9 @@ void ClientHandler::receiveData()
 
 void ClientHandler::receiveFile()
 {
-    QFile file(workingDirName + fileReceiving->getName());
-    if (!file.exists()) {
-        if (!file.open(QFile::WriteOnly))
-            return;
-    }
-    else if (!file.open(QFile::Append))
+    QFile file(workingDirName + "/" + fileReceiving->getName());
+
+    if (!file.open(QFile::Append))
         return;
     QByteArray byteArray = m_tcpSocket->readAll();
 
