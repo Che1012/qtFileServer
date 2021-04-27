@@ -4,7 +4,7 @@
 #include "fileinfo.h"
 
 FileInfo::FileInfo()
-    : name(""), size(0), date()
+    : name(""), size(0)
 {
 }
 
@@ -56,13 +56,7 @@ QDataStream& operator<<(QDataStream& stream, const FileInfo &fileInfo)
 }
 QDataStream& operator>>(QDataStream& stream, FileInfo &fileInfo)
 {
-    QString name;
-    qint64 size;
-    QDateTime date;
-    stream >> name >> size >> date;
-    fileInfo.setName(name);
-    fileInfo.setSize(size);
-    fileInfo.setDate(date);
+    stream >> fileInfo.name >> fileInfo.size >> fileInfo.date;
     return stream;
 }
 bool operator==(const FileInfo& left, const FileInfo& right)
@@ -115,14 +109,22 @@ QString FileInfo::string(QList<FileInfo> *fileList)
     return res;
 }
 
+QString FileInfo::getNameFromQList(QStringList &separatedName)
+{
+    QString fileName = separatedName[separatedName.size() - 1];
+    for (int i = separatedName.size() - 2; i >= 0; i--)
+        fileName += "/"+ separatedName[i];
+    return fileName;
+}
+
 QString FileInfo::toStr() const
 {
     return name + " " + QString::number(size) + " " + date.toString();
 }
 
-bool FileInfo::isUpToDate(const FileInfo &compared)
+bool FileInfo::isUpToDate(const FileInfo &compared) const
 {
-    if (this->date > compared.date)
+    if (this->date >= compared.date)
         return true;
     return false;
 }

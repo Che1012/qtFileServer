@@ -2,6 +2,7 @@
 #define CLIENTWIDGET_H
 
 #include <QWidget>
+#include <QTreeWidgetItem>
 
 #include "clienthandler.h"
 #include "fileinfo.h"
@@ -34,6 +35,7 @@ signals:
 private slots:
     void receivedFromClient(QString data);
     void on_connectBtn_clicked();
+
     void updateTreeWidget(QList<FileInfo> *fileList);
 
     void on_fileBtn_clicked();
@@ -49,9 +51,9 @@ private:
     ClientHandler m_client;
     QList<FileInfo>* currFileInfoList = nullptr;
 
-    bool checkTreeNode(QList<FileInfo> *prevList, FileInfo &node);
-    bool addTreeNode(QTreeWidgetItem *parent, FileInfo &node, int level);
-    int  getTreeChild(QTreeWidgetItem *parent, QString nodeName);
+    bool checkTreeNode(QList<FileInfo> *prevList, const FileInfo &node);
+    bool addTreeNode(QTreeWidgetItem *parent, const FileInfo &node, int level);
+    int  getTreeChild(QTreeWidgetItem *parent, const QString &nodeName);
 
     void updateTreeNode(QTreeWidgetItem *node);
 };

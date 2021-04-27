@@ -15,13 +15,17 @@ public:
 
     static void getFilesList(QList<FileInfo> *fileList,
                              QString path, QString root);
+
     static QString string(QList<FileInfo> *fileList);
+
+    static QString getNameFromQList(QStringList &separatedName);
+
     friend QDataStream& operator<<(QDataStream& stream, const FileInfo &fileInfo);
     friend QDataStream& operator>>(QDataStream& stream, FileInfo &fileInfo);
 
     friend bool operator==(const FileInfo& left, const FileInfo& right);
 
-    bool isUpToDate(const FileInfo &compared);
+    bool isUpToDate(const FileInfo &compared) const;
 
     QString getName() const;
     void setName(const QString &value);

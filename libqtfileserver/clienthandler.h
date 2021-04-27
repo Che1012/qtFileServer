@@ -3,12 +3,11 @@
 
 #include <QObject>
 #include <QtNetwork/QTcpSocket>
-#include <QTreeWidgetItem>
 
 #include "fileinfo.h"
-#include "tcppacket.h"
+#include "tcphandler.h"
 
-class ClientHandler : public QObject
+class ClientHandler : public TCPHandler
 {
     Q_OBJECT
 public:

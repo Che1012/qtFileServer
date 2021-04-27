@@ -9,9 +9,9 @@
 #include "QDir"
 
 #include "fileinfo.h"
-#include "tcppacket.h"
+#include "tcphandler.h"
 
-class ServerHandler : public QObject
+class ServerHandler : public TCPHandler
 {
     Q_OBJECT
 public:
@@ -47,7 +47,6 @@ private:
     QTcpSocket      *m_tcpServerConnection = nullptr;
     QSocketNotifier *m_input = nullptr;
     int              payLoadSize = 64 * 1024; //64Kb
-
 };
 
 

@@ -9,10 +9,13 @@ int main(int argc, char *argv[])
     QCoreApplication a(argc, argv);
 
     QString dirPath;
+    for(int i = 0; i < argc; i++)
+        qDebug() << QString(argv[i]);
     if (argc == 2)
-        dirPath = QString(argv[2]);
+        dirPath = QString(argv[1]);
     else
         dirPath = QDir::currentPath();
+
     ServerHandler *netHandler = new ServerHandler(&a, dirPath);
     netHandler->init();
     QObject::connect(netHandler, &ServerHandler::finished,

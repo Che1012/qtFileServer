@@ -37,34 +37,34 @@ void ServerHandler::acceptConnection()
 
 void ServerHandler::updateServer()
 {    
-    tcp::Command cmd = tcp::recieveCmd(m_tcpServerConnection);
+    tcp::Command cmd = recieveCmd(m_tcpServerConnection);
     qDebug() << "tcp request:" << cmd;
     switch (cmd) {
     case tcp::SendFilesList: {
         QList<FileInfo> fileList;
-        FileInfo::getFilesList(&fileList, QDir::currentPath(), "");
-        tcp::sendFilesList(m_tcpServerConnection, &fileList);
+        FileInfo::getFilesList(&fileList, filesDirPath, "");
+        sendFilesList(m_tcpServerConnection, &fileList);
         break;
     }
     case tcp::Echo: {
         QString str;
-        tcp::recieveString(m_tcpServerConnection, &str);
-        tcp::sendStringPacket(m_tcpServerConnection, &str);
+        recieveString(m_tcpServerConnection, str);
+        sendStringPacket(m_tcpServerConnection, str);
         break;
     }
     case tcp::StringValue: {
         QString str;
-        tcp::recieveString(m_tcpServerConnection, &str);
+        recieveString(m_tcpServerConnection, str);
         QTextStream outStream(stdout);
         outStream << str;
         break;
     }
     case tcp::SendFile: {
         QString fileName;
-        tcp::recieveFileName(m_tcpServerConnection, &fileName);
+        recieveFileName(m_tcpServerConnection, fileName);
         qDebug() << "preparing to find file:" << fileName;
         QFile file(fileName);
-        tcp::sendFile(m_tcpServerConnection, &file, payLoadSize);
+        sendFile(m_tcpServerConnection, &file, payLoadSize);
         break;
     }
     default:
@@ -95,7 +95,7 @@ void ServerHandler::checkCommand()
     switch (command) {
     case SendValue:
         stream >> value;
-        tcp::sendStringPacket(m_tcpServerConnection, &value);
+        sendStringPacket(m_tcpServerConnection, value);
         break;
     case Exit:
         stop();
@@ -130,7 +130,7 @@ ServerHandler::TermCommand ServerHandler::toCommand(const QString &cmd)
 }
 
 ServerHandler::ServerHandler(QObject *parent, QString filesDirPath)
-    : QObject(parent),
+    : TCPHandler(parent),
       filesDirPath(filesDirPath)
 {
 }

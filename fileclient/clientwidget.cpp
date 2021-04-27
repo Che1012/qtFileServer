@@ -53,7 +53,7 @@ void ClientWidget::updateTreeWidget(QList<FileInfo> *fileList)
     if (currFileInfoList != nullptr)
         delete currFileInfoList;
     currFileInfoList = new QList<FileInfo>();
-    /////TO-DO Remove from here
+    /////TO-DO Replace
     m_client.setWorkingDirName(m_ui->dirLineEdit->text());
     /////
     FileInfo::getFilesList(currFileInfoList, m_ui->dirLineEdit->text(), "");
@@ -63,29 +63,25 @@ void ClientWidget::updateTreeWidget(QList<FileInfo> *fileList)
         delete treeRoot;
     treeRoot = new QTreeWidgetItem(m_ui->treeWidget);
 
-    for (FileInfo info : *fileList)
-        if (!addTreeNode(treeRoot, info, 0))
-            qDebug() << "Error at creating tree";
+    for (int i = 0; i < fileList->size(); i++)
+            if (!addTreeNode(treeRoot, fileList->at(i), 0))
+                qDebug() << "Error at creating tree";
     treeRoot->setExpanded(true);
     delete fileList;
 }
 
 // returns true if file is up to date
-bool ClientWidget::checkTreeNode(QList<FileInfo> *prevList, FileInfo &node)
+bool ClientWidget::checkTreeNode(QList<FileInfo> *prevList, const FileInfo &node)
 {
     if (prevList == nullptr)
         return false;
     for (FileInfo temp : *prevList)
-        if (temp == node) {
-            if (temp.isUpToDate(node))
-                return true;
-            else
-                return false;
-        }
+        if (temp == node)
+            return node.isUpToDate(temp);
     return false;
 }
 
-bool ClientWidget::addTreeNode(QTreeWidgetItem* parent, FileInfo &node, int level)
+bool ClientWidget::addTreeNode(QTreeWidgetItem* parent, const FileInfo &node, int level)
 {
     if (parent == nullptr)
         return false;
@@ -119,7 +115,7 @@ bool ClientWidget::addTreeNode(QTreeWidgetItem* parent, FileInfo &node, int leve
     return false;
 }
 
-int ClientWidget::getTreeChild(QTreeWidgetItem *parent, QString nodeName)
+int ClientWidget::getTreeChild(QTreeWidgetItem *parent, const QString &nodeName)
 {
     for (int i = 0; i < parent->childCount(); i++) {
         if (parent->child(i)->text(Column::Name) == nodeName)
@@ -130,11 +126,12 @@ int ClientWidget::getTreeChild(QTreeWidgetItem *parent, QString nodeName)
 
 void ClientWidget::updateTreeNode(QTreeWidgetItem *node)
 {
-    QString fileName;
+    QStringList fileNameList;
     while (node->parent() != nullptr) {
-        fileName += node->text(Column::Name);
+        fileNameList.push_back(node->text(Column::Name));
         node = node->parent();
     }
+    QString fileName = FileInfo::getNameFromQList(fileNameList);
     qDebug() << "updating tree node" << fileName;
     emit sendFile(fileName);
 }

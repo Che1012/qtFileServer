@@ -1,7 +1,7 @@
-#include "tcppacket.h"
+#include "tcphandler.h"
 #include "QDebug"
 
-tcp::Command tcp::recieveCmd(QIODevice *dev)
+tcp::Command TCPHandler::recieveCmd(QIODevice *dev)
 {
     int cmd;
     QDataStream stream(dev);
@@ -9,17 +9,17 @@ tcp::Command tcp::recieveCmd(QIODevice *dev)
     return static_cast<tcp::Command>(cmd);
 }
 
-bool tcp::recieveString(QIODevice *dev, QString *str)
+bool TCPHandler::recieveString(QIODevice *dev, QString &str)
 {
     if (dev == nullptr || !dev->isOpen() || !dev->isReadable())
         return false;
     QDataStream dataStream(dev);
-    dataStream >> *str;
-    qDebug() << "recieveString:" << *str;
+    dataStream >> str;
+    qDebug() << "recieveString:" << str;
     return true;
 }
 
-bool tcp::recieveFilesList(QIODevice *dev, QList<FileInfo> *list)
+bool TCPHandler::recieveFilesList(QIODevice *dev, QList<FileInfo> *list)
 {
     if (dev == nullptr || !dev->isOpen() || !dev->isReadable())
         return false;
@@ -29,52 +29,52 @@ bool tcp::recieveFilesList(QIODevice *dev, QList<FileInfo> *list)
     return true;
 }
 
-bool tcp::sendEchoPacket(QIODevice *dev, QString *value)
+bool TCPHandler::sendEchoPacket(QIODevice *dev, const QString &value)
 {
     QDataStream dataStream(dev);
-    dataStream << static_cast<int>(tcp::Echo) << *value;
+    dataStream << static_cast<int>(tcp::Echo) << value;
     return true;
 }
 
-bool tcp::sendStringPacket(QIODevice *dev, QString *value)
+bool TCPHandler::sendStringPacket(QIODevice *dev, const QString &value)
 {
     QDataStream dataStream(dev);
-    dataStream << static_cast<int>(tcp::StringValue) << *value;
+    dataStream << static_cast<int>(tcp::StringValue) << value;
     return true;
 }
 
-bool tcp::sendFilesListRequest(QIODevice *dev)
+bool TCPHandler::sendFilesListRequest(QIODevice *dev)
 {
     QDataStream dataStream(dev);
     dataStream << static_cast<int>(tcp::SendFilesList);
     return true;
 }
 
-bool tcp::sendFilesList(QIODevice *dev, QList<FileInfo> *list)
+bool TCPHandler::sendFilesList(QIODevice *dev, const QList<FileInfo> *list)
 {
     QDataStream dataStream(dev);
     dataStream << static_cast<int>(tcp::FilesList) << *list;
     return true;
 }
 
-bool tcp::sendFileRequest(QIODevice *dev, QString* name)
+bool TCPHandler::sendFileRequest(QIODevice *dev, const QString& name)
 {
     QDataStream dataStream(dev);
-    dataStream << static_cast<int>(tcp::SendFile) << *name;
+    dataStream << static_cast<int>(tcp::SendFile) << name;
     return true;
 }
 
-bool tcp::recieveFileName(QIODevice *dev, QString *name)
+bool TCPHandler::recieveFileName(QIODevice *dev, QString &name)
 {
     if (dev == nullptr || !dev->isOpen() || !dev->isReadable())
         return false;
     QDataStream stream(dev);
-    stream >> *name;
-    qDebug() << "recieveFileName:" << *name;
+    stream >> name;
+    qDebug() << "recieveFileName:" << name;
     return true;
 }
 
-bool tcp::sendFile(QIODevice *dev, QFile *file, qint64 payLoad)
+bool TCPHandler::sendFile(QIODevice *dev, QFile *file, qint64 payLoadSize)
 {
     if (!file->open(QFile::ReadOnly))
         return false;
@@ -84,16 +84,17 @@ bool tcp::sendFile(QIODevice *dev, QFile *file, qint64 payLoad)
                 << file->size();
     delete dataStream;
     while (!file->atEnd())
-        dev->write(file->read(payLoad));
+        dev->write(file->read(payLoadSize));
+    qDebug() << "File" << file->fileName() << "sended";
     return true;
 }
 
-bool tcp::recieveFileInfo(QIODevice *dev, QString *fileName, quint64 *fileSize)
+bool TCPHandler::recieveFileInfo(QIODevice *dev, QString &fileName, quint64 &fileSize)
 {
     if (dev == nullptr || !dev->isOpen() || !dev->isReadable())
         return false;
     QDataStream dataStream(dev);
-    dataStream >> *fileName >> *fileSize;
-    qDebug() << "recieveFileInfo:" << *fileName << *fileSize;
+    dataStream >> fileName >> fileSize;
+    qDebug() << "recieveFileInfo:" << fileName << fileSize;
     return true;
 }

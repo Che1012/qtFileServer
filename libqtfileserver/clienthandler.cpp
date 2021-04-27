@@ -19,25 +19,25 @@ void ClientHandler::stop()
 
 void ClientHandler::receiveData()
 {
-    tcp::Command tcpCmd = tcp::recieveCmd(m_tcpSocket);
+    tcp::Command tcpCmd = recieveCmd(m_tcpSocket);
     qDebug() << "tcp request:" << tcpCmd;
     switch (tcpCmd) {
     case tcp::StringValue: {
         QString str;
-        tcp::recieveString(m_tcpSocket, &str);
+        recieveString(m_tcpSocket, str);
         emit received(str);
         break;
     }
     case tcp::Echo: {
         QString str;
-        tcp::recieveString(m_tcpSocket, &str);
-        tcp::sendStringPacket(m_tcpSocket, &str);
+        recieveString(m_tcpSocket, str);
+        sendStringPacket(m_tcpSocket, str);
         break;
     }
     case tcp::StartFilePacket: {
         QString fileName;
         quint64 fileSize;
-        tcp::recieveFileInfo(m_tcpSocket, &fileName, &fileSize);
+        recieveFileInfo(m_tcpSocket, fileName, fileSize);
         fileReceiving = new FileInfo(fileName, fileSize);
         remainingSize = fileSize;
 
@@ -53,7 +53,7 @@ void ClientHandler::receiveData()
     }
     case tcp::FilesList: {
         QList<FileInfo> *fileList = new QList<FileInfo>();
-        tcp::recieveFilesList(m_tcpSocket, fileList);
+        recieveFilesList(m_tcpSocket, fileList);
         emit filesReceived(fileList);
         break;
     }
@@ -84,17 +84,17 @@ void ClientHandler::receiveFile()
 
 void ClientHandler::sendEcho(QString value)
 {
-    tcp::sendEchoPacket(m_tcpSocket, &value);
+    sendEchoPacket(m_tcpSocket, value);
 }
 
 void ClientHandler::sendFileListReq()
 {
-    tcp::sendFilesListRequest(m_tcpSocket);
+    sendFilesListRequest(m_tcpSocket);
 }
 
 void ClientHandler::sendFileReq(QString fileName)
 {
-    tcp::sendFileRequest(m_tcpSocket, &fileName);
+    sendFileRequest(m_tcpSocket, fileName);
 }
 
 QString ClientHandler::getWorkingDirName() const
@@ -108,7 +108,7 @@ void ClientHandler::setWorkingDirName(const QString &value)
 }
 
 ClientHandler::ClientHandler(QObject *parent)
-    : QObject(parent)
+    : TCPHandler(parent)
 {
     m_tcpSocket = new QTcpSocket();
 }
