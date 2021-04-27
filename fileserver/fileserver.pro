@@ -1,6 +1,8 @@
 QT -= gui
 QT += network testlib
 
+TEMPLATE = app
+
 CONFIG += c++11 console
 CONFIG -= app_bundle
 

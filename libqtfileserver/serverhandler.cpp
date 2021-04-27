@@ -63,8 +63,8 @@ void ServerHandler::updateServer()
         QString fileName;
         recieveFileName(m_tcpServerConnection, fileName);
         qDebug() << "preparing to find file:" << fileName;
-        QFile file(fileName);
-        sendFile(m_tcpServerConnection, &file, payLoadSize);
+        QFile file(filesDirPath + "/" + fileName);
+        sendFile(m_tcpServerConnection, &file, fileName, payLoadSize);
         break;
     }
     default:

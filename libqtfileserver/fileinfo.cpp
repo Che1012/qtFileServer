@@ -128,3 +128,18 @@ bool FileInfo::isUpToDate(const FileInfo &compared) const
         return true;
     return false;
 }
+
+void FileInfo::createEmptyFile(const QString &pathToFile)
+{
+    QDir dir(pathToFile + "/" + getFilePath());
+    dir.mkpath(dir.path());
+    QFile file(pathToFile + "/" + name);
+    file.open(QFile::WriteOnly);
+    file.close();
+}
+
+QString FileInfo::getFilePath() const
+{
+    int indx = name.lastIndexOf("/");
+    return name.left(indx == -1 ? 0 : indx);
+}

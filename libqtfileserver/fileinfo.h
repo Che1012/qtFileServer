@@ -27,6 +27,10 @@ public:
 
     bool isUpToDate(const FileInfo &compared) const;
 
+    void createEmptyFile(const QString &pathToFile);
+
+    QString getFilePath() const;
+
     QString getName() const;
     void setName(const QString &value);
 

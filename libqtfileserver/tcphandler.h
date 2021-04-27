@@ -40,7 +40,7 @@ bool sendStringPacket(QIODevice *dev, const QString &value);
 bool sendFilesListRequest(QIODevice *dev);
 bool sendFilesList(QIODevice *dev, const QList<FileInfo> *list);
 bool sendFileRequest(QIODevice *dev, const QString &name);
-bool sendFile(QIODevice *dev, QFile *file, const qint64 payLoadSize);
+bool sendFile(QIODevice *dev, QFile *file, QString &fileShortName, const qint64 payLoadSize);
 };
 
 #endif // TCPHANDLER_H

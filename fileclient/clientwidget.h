@@ -51,7 +51,7 @@ private:
     ClientHandler m_client;
     QList<FileInfo>* currFileInfoList = nullptr;
 
-    bool checkTreeNode(QList<FileInfo> *prevList, const FileInfo &node);
+    bool checkTreeNode(QList<FileInfo> *list, const FileInfo &node);
     bool addTreeNode(QTreeWidgetItem *parent, const FileInfo &node, int level);
     int  getTreeChild(QTreeWidgetItem *parent, const QString &nodeName);
 

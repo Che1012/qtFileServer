@@ -70,14 +70,14 @@ void ClientWidget::updateTreeWidget(QList<FileInfo> *fileList)
     delete fileList;
 }
 
-// returns true if file is up to date
-bool ClientWidget::checkTreeNode(QList<FileInfo> *prevList, const FileInfo &node)
+// returns true if file from the list is up to date compare to node
+bool ClientWidget::checkTreeNode(QList<FileInfo> *list, const FileInfo &node)
 {
-    if (prevList == nullptr)
+    if (list == nullptr)
         return false;
-    for (FileInfo temp : *prevList)
+    for (FileInfo temp : *list)
         if (temp == node)
-            return node.isUpToDate(temp);
+            return temp.isUpToDate(node);
     return false;
 }
 

@@ -40,11 +40,7 @@ void ClientHandler::receiveData()
         recieveFileInfo(m_tcpSocket, fileName, fileSize);
         fileReceiving = new FileInfo(fileName, fileSize);
         remainingSize = fileSize;
-
-        QFile file(workingDirName + "/" + fileName);
-        file.open(QFile::WriteOnly);
-        file.close();
-
+        fileReceiving->createEmptyFile(workingDirName);
         disconnect(m_tcpSocket, &QIODevice::readyRead,
                    this, &ClientHandler::receiveData);
         connect(m_tcpSocket, &QIODevice::readyRead,
@@ -79,6 +75,7 @@ void ClientHandler::receiveFile()
                 this, &ClientHandler::receiveFile);
         connect(m_tcpSocket, &QIODevice::readyRead,
                    this, &ClientHandler::receiveData);
+        delete fileReceiving;
     }
 }
 
@@ -115,6 +112,9 @@ ClientHandler::ClientHandler(QObject *parent)
 
 ClientHandler::~ClientHandler()
 {
-    delete m_tcpSocket;
+    if (!m_tcpSocket)
+        delete m_tcpSocket;
+    if (!fileReceiving)
+        delete fileReceiving;
 }
 

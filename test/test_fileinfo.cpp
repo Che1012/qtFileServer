@@ -12,6 +12,7 @@ public:
 
 private slots:
     void isUpToDate();
+    void getFilePath();
 
 };
 
@@ -36,6 +37,21 @@ void Test_FileInfo::isUpToDate()
     QCOMPARE(fileInfo.isUpToDate(earlierDay), true);
     QCOMPARE(fileInfo.isUpToDate(earlierTime), true);
 }
+
+void Test_FileInfo::getFilePath()
+{
+    QCOMPARE(FileInfo("", 1024).getFilePath(), "");
+
+    QCOMPARE(FileInfo("test", 1024).getFilePath(), "");
+    QCOMPARE(FileInfo("fasd/test", 1024).getFilePath(), "fasd");
+    QCOMPARE(FileInfo("temp/dust/test", 1024).getFilePath(), "temp/dust");
+
+    QCOMPARE(FileInfo("test.o", 1024).getFilePath(), "");
+    QCOMPARE(FileInfo("fasd/test.o", 1024).getFilePath(), "fasd");
+    QCOMPARE(FileInfo("temp/dust/test.o", 1024).getFilePath(), "temp/dust");
+}
+
+
 
 QTEST_APPLESS_MAIN(Test_FileInfo)
 

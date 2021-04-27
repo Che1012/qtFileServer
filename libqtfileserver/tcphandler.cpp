@@ -74,22 +74,28 @@ bool TCPHandler::recieveFileName(QIODevice *dev, QString &name)
     return true;
 }
 
-bool TCPHandler::sendFile(QIODevice *dev, QFile *file, qint64 payLoadSize)
+bool TCPHandler::sendFile(QIODevice *dev, QFile *file,
+                          QString &fileShortName,
+                          qint64 payLoadSize)
 {
-    if (!file->open(QFile::ReadOnly))
+    if (!file->open(QFile::ReadOnly)) {
+        qDebug() << "Can not open file to read";
         return false;
+    }
     QDataStream *dataStream = new QDataStream(dev);
     *dataStream << static_cast<int>(tcp::StartFilePacket)
-                << file->fileName()
+                << fileShortName
                 << file->size();
     delete dataStream;
     while (!file->atEnd())
-        dev->write(file->read(payLoadSize));
-    qDebug() << "File" << file->fileName() << "sended";
+        dev->write(file->read(file->size() < payLoadSize ? file->size() : payLoadSize));
+    qDebug() << "File" << file->fileName() << "sended" << file->size();
     return true;
 }
 
-bool TCPHandler::recieveFileInfo(QIODevice *dev, QString &fileName, quint64 &fileSize)
+bool TCPHandler::recieveFileInfo(QIODevice *dev,
+                                 QString &fileName,
+                                 quint64 &fileSize)
 {
     if (dev == nullptr || !dev->isOpen() || !dev->isReadable())
         return false;
