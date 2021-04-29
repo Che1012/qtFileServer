@@ -34,27 +34,30 @@ signals:
 
 private slots:
     void receivedFromClient(QString data);
-    void on_connectBtn_clicked();
+
+    void recievedfilePacket(qint64 fileSize, qint64 recievedDataSize);
 
     void updateTreeWidget(QList<FileInfo> *fileList);
 
-    void on_fileBtn_clicked();
+    void showContextMenu(const QPoint &pos);
 
+    void on_connectBtn_clicked();
     void on_syncBtn_clicked();
-
     void on_echoBtn_clicked();
 
-    void showContextMenu(const QPoint &pos);
+    void on_updateFilesBtn_clicked();
 
 private:
     Ui::ClientWidget *m_ui;
     ClientHandler m_client;
     QList<FileInfo>* currFileInfoList = nullptr;
+    QList<FileInfo>* filesAtClientList = nullptr;
 
     bool checkTreeNode(QList<FileInfo> *list, const FileInfo &node);
     bool addTreeNode(QTreeWidgetItem *parent, const FileInfo &node, int level);
     int  getTreeChild(QTreeWidgetItem *parent, const QString &nodeName);
 
     void updateTreeNode(QTreeWidgetItem *node);
+    void updateTreeNode(const QString &nodeName);
 };
 #endif // CLIENTWIDGET_H

@@ -26,6 +26,9 @@ ClientWidget::ClientWidget(QWidget *parent)
     connect(this,      &ClientWidget::sendData,
             &m_client, &ClientHandler::sendEcho);
 
+    connect(&m_client, &ClientHandler::filePacketReceived,
+            this,      &ClientWidget::recievedfilePacket);
+
     m_ui->treeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(m_ui->treeWidget, &QWidget::customContextMenuRequested,
             this,             &ClientWidget::showContextMenu);
@@ -42,9 +45,16 @@ void ClientWidget::receivedFromClient(QString data)
     m_ui->textReceived->setText(str);
 }
 
+void ClientWidget::recievedfilePacket(qint64 fileSize, qint64 recievedDataSize)
+{
+    float progress = static_cast<float>(fileSize) /
+                     static_cast<float>(recievedDataSize) * 100;
+    m_ui->progressBar->setValue(static_cast<int>(progress));
+}
+
 void ClientWidget::on_connectBtn_clicked()
 {
-    m_client.start();
+    m_client.start(m_ui->ipLineEdit->text(), m_ui->portLineEdit->text().toInt());
 }
 
 void ClientWidget::updateTreeWidget(QList<FileInfo> *fileList)
@@ -52,22 +62,25 @@ void ClientWidget::updateTreeWidget(QList<FileInfo> *fileList)
     qDebug() << "updating treeWidget";
     if (currFileInfoList != nullptr)
         delete currFileInfoList;
-    currFileInfoList = new QList<FileInfo>();
+    currFileInfoList = fileList;
     /////TO-DO Replace
     m_client.setWorkingDirName(m_ui->dirLineEdit->text());
     /////
-    FileInfo::getFilesList(currFileInfoList, m_ui->dirLineEdit->text(), "");
+
+    if (filesAtClientList != nullptr)
+        delete filesAtClientList;
+    filesAtClientList = new QList<FileInfo>;
+    FileInfo::getFilesList(filesAtClientList, m_ui->dirLineEdit->text(), "");
 
     QTreeWidgetItem* treeRoot = m_ui->treeWidget->takeTopLevelItem(0);
     if (treeRoot != nullptr)
         delete treeRoot;
     treeRoot = new QTreeWidgetItem(m_ui->treeWidget);
 
-    for (int i = 0; i < fileList->size(); i++)
-            if (!addTreeNode(treeRoot, fileList->at(i), 0))
+    for (int i = 0; i < currFileInfoList->size(); i++)
+            if (!addTreeNode(treeRoot, currFileInfoList->at(i), 0))
                 qDebug() << "Error at creating tree";
     treeRoot->setExpanded(true);
-    delete fileList;
 }
 
 // returns true if file from the list is up to date compare to node
@@ -81,7 +94,9 @@ bool ClientWidget::checkTreeNode(QList<FileInfo> *list, const FileInfo &node)
     return false;
 }
 
-bool ClientWidget::addTreeNode(QTreeWidgetItem* parent, const FileInfo &node, int level)
+bool ClientWidget::addTreeNode(QTreeWidgetItem* parent,
+                               const FileInfo &node,
+                               int level)
 {
     if (parent == nullptr)
         return false;
@@ -98,7 +113,7 @@ bool ClientWidget::addTreeNode(QTreeWidgetItem* parent, const FileInfo &node, in
         item->setText(Column::Name, nodeSubName);
         item->setText(Column::Size, QString::number(node.getSize()));
         item->setText(Column::Date, node.getDate().toString());
-        if (checkTreeNode(currFileInfoList, node))
+        if (checkTreeNode(filesAtClientList, node))
             item->setText(Column::Status, "Up to date");
         else
             item->setText(Column::Status, "Need update");
@@ -136,9 +151,10 @@ void ClientWidget::updateTreeNode(QTreeWidgetItem *node)
     emit sendFile(fileName);
 }
 
-void ClientWidget::on_fileBtn_clicked()
+void ClientWidget::updateTreeNode(const QString &nodeName)
 {
-    emit sendFile(m_ui->fileLineEdit->text());
+    qDebug() << "updating tree node" << nodeName;
+    emit sendFile(nodeName);
 }
 
 void ClientWidget::on_syncBtn_clicked()
@@ -172,4 +188,14 @@ void ClientWidget::showContextMenu(const QPoint &pos)
         else {
             // nothing was chosen
         }
+}
+
+void ClientWidget::on_updateFilesBtn_clicked()
+{
+    if (!currFileInfoList || !filesAtClientList)
+        return;
+    for (int i = 0; i < currFileInfoList->size(); i++) {
+        if (!checkTreeNode(filesAtClientList, currFileInfoList->at(i)))
+            updateTreeNode(currFileInfoList->at(i).getName());
+    }
 }

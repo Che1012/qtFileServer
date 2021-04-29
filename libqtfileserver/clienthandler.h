@@ -16,28 +16,22 @@ public:
 
     bool createFileTree(QList<FileInfo> *fileList);
 
-    QString getWorkingDirName() const;
-    void setWorkingDirName(const QString &value);
-
+    bool startNextCmd() override;
 signals:
     void finished();
     void received(QString data);
     void filesReceived(QList<FileInfo> *fileList);
 
 public slots:
-    void start();
+    void start(const QString &ip, const int port);
     void stop();
     void receiveData();
-    void receiveFile();
     void sendEcho(QString value);
     void sendFileListReq();
     void sendFileReq(QString fileName);
 
 private:
     QTcpSocket *m_tcpSocket;
-    FileInfo *fileReceiving = nullptr;
-    qint64 remainingSize;
-    QString workingDirName;
 };
 
 

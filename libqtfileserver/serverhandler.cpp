@@ -42,7 +42,7 @@ void ServerHandler::updateServer()
     switch (cmd) {
     case tcp::SendFilesList: {
         QList<FileInfo> fileList;
-        FileInfo::getFilesList(&fileList, filesDirPath, "");
+        FileInfo::getFilesList(&fileList, getWorkingDirName(), "");
         sendFilesList(m_tcpServerConnection, &fileList);
         break;
     }
@@ -63,8 +63,8 @@ void ServerHandler::updateServer()
         QString fileName;
         recieveFileName(m_tcpServerConnection, fileName);
         qDebug() << "preparing to find file:" << fileName;
-        QFile file(filesDirPath + "/" + fileName);
-        sendFile(m_tcpServerConnection, &file, fileName, payLoadSize);
+        QFile file(getWorkingDirName() + "/" + fileName);
+        sendFile(m_tcpServerConnection, &file, fileName);
         break;
     }
     default:
@@ -129,9 +129,8 @@ ServerHandler::TermCommand ServerHandler::toCommand(const QString &cmd)
     return NotCommand;
 }
 
-ServerHandler::ServerHandler(QObject *parent, QString filesDirPath)
-    : TCPHandler(parent),
-      filesDirPath(filesDirPath)
+ServerHandler::ServerHandler(QObject *parent, QString workingDirName)
+    : TCPHandler(parent, workingDirName)
 {
 }
 

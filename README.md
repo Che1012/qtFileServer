@@ -1,1 +1,1 @@
-File storage and synchronization app with server/client on c++/Qt
+File storage and synchronization app with server/client on C++/Qt

@@ -5,9 +5,9 @@
 
 #include "clienthandler.h"
 
-void ClientHandler::start()
+void ClientHandler::start(const QString &ip, const int port)
 {
-    m_tcpSocket->connectToHost(QHostAddress::LocalHost, 6060);
+    m_tcpSocket->connectToHost(ip, port);
     connect(m_tcpSocket, &QIODevice::readyRead,
             this, &ClientHandler::receiveData);
 }
@@ -26,6 +26,8 @@ void ClientHandler::receiveData()
         QString str;
         recieveString(m_tcpSocket, str);
         emit received(str);
+        unhandleCmd();
+        startNextCmd();
         break;
     }
     case tcp::Echo: {
@@ -35,22 +37,25 @@ void ClientHandler::receiveData()
         break;
     }
     case tcp::StartFilePacket: {
-        QString fileName;
-        quint64 fileSize;
-        recieveFileInfo(m_tcpSocket, fileName, fileSize);
-        fileReceiving = new FileInfo(fileName, fileSize);
-        remainingSize = fileSize;
-        fileReceiving->createEmptyFile(workingDirName);
-        disconnect(m_tcpSocket, &QIODevice::readyRead,
-                   this, &ClientHandler::receiveData);
-        connect(m_tcpSocket, &QIODevice::readyRead,
-                this, &ClientHandler::receiveFile);
+        recieveFileInfo(m_tcpSocket);
+        fileReceiving->createEmptyFile(getWorkingDirName());
         break;
     }
     case tcp::FilesList: {
         QList<FileInfo> *fileList = new QList<FileInfo>();
         recieveFilesList(m_tcpSocket, fileList);
         emit filesReceived(fileList);
+        unhandleCmd();
+        startNextCmd();
+        break;
+    }
+    case tcp::FilePacket: {
+        receiveFile(m_tcpSocket);
+        if (remainRFileSize <= 0) {
+            delete fileReceiving;
+            unhandleCmd();
+            startNextCmd();
+        }
         break;
     }
     default:
@@ -59,49 +64,46 @@ void ClientHandler::receiveData()
     }
 }
 
-void ClientHandler::receiveFile()
-{
-    QFile file(workingDirName + "/" + fileReceiving->getName());
-
-    if (!file.open(QFile::Append))
-        return;
-    QByteArray byteArray = m_tcpSocket->readAll();
-
-    remainingSize -= byteArray.size();
-    file.write(byteArray);
-    file.close();
-    if (remainingSize <= 0) {
-        disconnect(m_tcpSocket, &QIODevice::readyRead,
-                this, &ClientHandler::receiveFile);
-        connect(m_tcpSocket, &QIODevice::readyRead,
-                   this, &ClientHandler::receiveData);
-        delete fileReceiving;
-    }
-}
-
 void ClientHandler::sendEcho(QString value)
 {
-    sendEchoPacket(m_tcpSocket, value);
+    putCmdToQueue(tcp::CommandType(tcp::Echo, value));
+    startNextCmd();
 }
 
 void ClientHandler::sendFileListReq()
 {
-    sendFilesListRequest(m_tcpSocket);
+    putCmdToQueue(tcp::CommandType(tcp::SendFilesList, ""));
+    startNextCmd();
 }
 
 void ClientHandler::sendFileReq(QString fileName)
 {
-    sendFileRequest(m_tcpSocket, fileName);
+    putCmdToQueue(tcp::CommandType(tcp::SendFile, fileName));
+    startNextCmd();
 }
 
-QString ClientHandler::getWorkingDirName() const
+bool ClientHandler::startNextCmd()
 {
-    return workingDirName;
-}
-
-void ClientHandler::setWorkingDirName(const QString &value)
-{
-    workingDirName = value;
+    if (isCmdHandling())
+        return false;
+    tcp::CommandType cmdType = takeCmdFromQueue();
+    if (cmdType.cmd == tcp::NotCommand)
+        return false;
+    handleCmd();
+    switch (cmdType.cmd) {
+    case tcp::SendFilesList:
+        sendFilesListRequest(m_tcpSocket);
+        break;
+    case tcp::Echo:
+        sendEchoPacket(m_tcpSocket, cmdType.value);
+        break;
+    case tcp::SendFile:
+        sendFileRequest(m_tcpSocket, cmdType.value);
+        break;
+    default:
+        break;
+    }
+    return true;
 }
 
 ClientHandler::ClientHandler(QObject *parent)

@@ -42,11 +42,9 @@ public slots:
     void checkCommand();
 
 private:
-    QString         filesDirPath;
     QTcpServer      *m_tcpServer = nullptr;
     QTcpSocket      *m_tcpServerConnection = nullptr;
     QSocketNotifier *m_input = nullptr;
-    int              payLoadSize = 64 * 1024; //64Kb
 };
 
 
