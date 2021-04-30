@@ -27,14 +27,15 @@ public:
     ClientWidget(QWidget *parent = nullptr);
     ~ClientWidget();
 
+    void saveSettings();
+    void loadSettings();
+
 signals:
     void sendData(QString data);
     void sendFile(QString name);
     void sendFilesList();
 
 private slots:
-    void receivedFromClient(QString data);
-
     void recievedfilePacket(qint64 fileSize, qint64 recievedDataSize);
 
     void updateTreeWidget(QList<FileInfo> *fileList);
@@ -43,10 +44,11 @@ private slots:
 
     void on_connectBtn_clicked();
     void on_syncBtn_clicked();
-    void on_echoBtn_clicked();
 
     void on_updateFilesBtn_clicked();
 
+    void connected();
+    void disconnected();
 private:
     Ui::ClientWidget *m_ui;
     ClientHandler m_client;

@@ -10,6 +10,10 @@ void ClientHandler::start(const QString &ip, const int port)
     m_tcpSocket->connectToHost(ip, port);
     connect(m_tcpSocket, &QIODevice::readyRead,
             this, &ClientHandler::receiveData);
+
+    connect(m_tcpSocket, &QAbstractSocket::connected,
+            this, &ClientHandler::receiveData);
+
 }
 
 void ClientHandler::stop()

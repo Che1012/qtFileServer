@@ -1,6 +1,7 @@
 #include <QTreeWidget>
 #include <QDir>
 #include <QMenu>
+#include <QSettings>
 
 
 #include "clientwidget.h"
@@ -11,8 +12,6 @@ ClientWidget::ClientWidget(QWidget *parent)
     , m_ui(new Ui::ClientWidget)
 {
     m_ui->setupUi(this);
-    connect(&m_client, &ClientHandler::received,
-            this,      &ClientWidget::receivedFromClient);
 
     connect(this,      &ClientWidget::sendFile,
             &m_client, &ClientHandler::sendFileReq);
@@ -32,23 +31,37 @@ ClientWidget::ClientWidget(QWidget *parent)
     m_ui->treeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(m_ui->treeWidget, &QWidget::customContextMenuRequested,
             this,             &ClientWidget::showContextMenu);
+    loadSettings();
 }
 
 ClientWidget::~ClientWidget()
 {
+    saveSettings();
     delete m_ui;
 }
 
-void ClientWidget::receivedFromClient(QString data)
+void ClientWidget::saveSettings()
 {
-    QString str = m_ui->textReceived->toPlainText() + "\n" + data;
-    m_ui->textReceived->setText(str);
+    QSettings settings("OpenSoft", "QtFileServer");
+
+    settings.setValue("client/ipLineEdit", m_ui->ipLineEdit->text());
+    settings.setValue("client/portLineEdit", m_ui->portLineEdit->text());
+    settings.setValue("client/dirLineEdit", m_ui->dirLineEdit->text());
+}
+
+void ClientWidget::loadSettings()
+{
+    QSettings settings("OpenSoft", "QtFileServer");
+
+    m_ui->ipLineEdit->setText(settings.value("client/ipLineEdit").toString());
+    m_ui->portLineEdit->setText(settings.value("client/portLineEdit").toString());
+    m_ui->dirLineEdit->setText(settings.value("client/dirLineEdit").toString());
 }
 
 void ClientWidget::recievedfilePacket(qint64 fileSize, qint64 recievedDataSize)
 {
-    float progress = static_cast<float>(fileSize) /
-                     static_cast<float>(recievedDataSize) * 100;
+    float progress = static_cast<float>(recievedDataSize) /
+                     static_cast<float>(fileSize) * 100;
     m_ui->progressBar->setValue(static_cast<int>(progress));
 }
 
@@ -162,11 +175,6 @@ void ClientWidget::on_syncBtn_clicked()
     emit sendFilesList();
 }
 
-void ClientWidget::on_echoBtn_clicked()
-{
-    emit sendData(m_ui->echoLineEdit->text());
-}
-
 void ClientWidget::showContextMenu(const QPoint &pos)
 {
     // for most widgets
@@ -175,6 +183,8 @@ void ClientWidget::showContextMenu(const QPoint &pos)
         // QPoint globalPos = myWidget->viewport()->mapToGlobal(pos);
 
         QMenu myMenu;
+        if (m_ui->treeWidget->itemAt(pos) == nullptr)
+            return;
         myMenu.addAction("Update");
 
         QAction* selectedItem = myMenu.exec(globalPos);
@@ -184,6 +194,7 @@ void ClientWidget::showContextMenu(const QPoint &pos)
                          << m_ui->treeWidget->currentItem()->text(Column::Name);
                 updateTreeNode(m_ui->treeWidget->currentItem());
             }
+            emit sendFilesList();
         }
         else {
             // nothing was chosen
@@ -198,4 +209,15 @@ void ClientWidget::on_updateFilesBtn_clicked()
         if (!checkTreeNode(filesAtClientList, currFileInfoList->at(i)))
             updateTreeNode(currFileInfoList->at(i).getName());
     }
+    emit sendFilesList();
+}
+
+void ClientWidget::connected()
+{
+
+}
+
+void ClientWidget::disconnected()
+{
+
 }
