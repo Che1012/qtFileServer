@@ -38,23 +38,22 @@ signals:
 private slots:
     void recievedfilePacket(qint64 fileSize, qint64 recievedDataSize);
 
+    // UI
+    void updateConnectionStatus(bool status);
     void updateTreeWidget(QList<FileInfo> *fileList);
-
     void showContextMenu(const QPoint &pos);
 
     void on_connectBtn_clicked();
     void on_syncBtn_clicked();
-
     void on_updateFilesBtn_clicked();
 
-    void connected();
-    void disconnected();
 private:
     Ui::ClientWidget *m_ui;
     ClientHandler m_client;
     QList<FileInfo>* currFileInfoList = nullptr;
     QList<FileInfo>* filesAtClientList = nullptr;
 
+    // FileTree
     bool checkTreeNode(QList<FileInfo> *list, const FileInfo &node);
     bool addTreeNode(QTreeWidgetItem *parent, const FileInfo &node, int level);
     int  getTreeChild(QTreeWidgetItem *parent, const QString &nodeName);

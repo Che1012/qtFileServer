@@ -37,29 +37,29 @@ void ServerHandler::acceptConnection()
 
 void ServerHandler::updateServer()
 {    
-    tcp::Command cmd = recieveCmd(m_tcpServerConnection);
+    TCPCommand cmd = recieveCmd(m_tcpServerConnection);
     qDebug() << "tcp request:" << cmd;
     switch (cmd) {
-    case tcp::SendFilesList: {
+    case SendFilesList: {
         QList<FileInfo> fileList;
         FileInfo::getFilesList(&fileList, getWorkingDirName(), "");
         sendFilesList(m_tcpServerConnection, &fileList);
         break;
     }
-    case tcp::Echo: {
+    case Echo: {
         QString str;
         recieveString(m_tcpServerConnection, str);
         sendStringPacket(m_tcpServerConnection, str);
         break;
     }
-    case tcp::StringValue: {
+    case StringValue: {
         QString str;
         recieveString(m_tcpServerConnection, str);
         QTextStream outStream(stdout);
         outStream << str;
         break;
     }
-    case tcp::SendFile: {
+    case SendFile: {
         QString fileName;
         recieveFileName(m_tcpServerConnection, fileName);
         qDebug() << "preparing to find file:" << fileName;
@@ -93,14 +93,14 @@ void ServerHandler::checkCommand()
     TermCommand command = toCommand(cmd);
 
     switch (command) {
-    case SendValue:
+    case TermCommand::SendValue:
         stream >> value;
         sendStringPacket(m_tcpServerConnection, value);
         break;
-    case Exit:
+    case TermCommand::Exit:
         stop();
         break; 
-    case NotCommand:
+    case TermCommand::NotCommand:
         qDebug() << "Not a command, try another one..";
         break;
     }
@@ -123,10 +123,10 @@ void ServerHandler::init()
 ServerHandler::TermCommand ServerHandler::toCommand(const QString &cmd)
 {
     if (cmd == "send")
-        return SendValue;
+        return TermCommand::SendValue;
     if (cmd == "exit")
-        return Exit;
-    return NotCommand;
+        return TermCommand::Exit;
+    return TermCommand::NotCommand;
 }
 
 ServerHandler::ServerHandler(QObject *parent, QString workingDirName)

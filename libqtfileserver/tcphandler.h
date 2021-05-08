@@ -8,80 +8,81 @@
 
 #include "fileinfo.h"
 
-namespace tcp {
-
-enum Command {
-    NotCommand = 0,
-    SendFilesList = 208,
-    Echo,
-    SendFile,
-
-    FilesList,
-    StringValue,
-    StartFilePacket,
-    FilePacket
-};
-struct CommandType
-{
-    CommandType(Command cmd = NotCommand, const QString& value = "")
-        :cmd(cmd), value(value) {};
-    Command cmd;
-    QString value;
-};
-}
-
 class TCPHandler : public QObject
 {
 Q_OBJECT
 
 signals:
      void filePacketReceived(qint64 fileSize, qint64 recievedDataSize);
+
 public:
-    QString getWorkingDirName() const {return  workingDirName;};
-    void    setWorkingDirName(const QString &value) {workingDirName = value;};
-protected:
+     enum TCPCommand {
+         NotCommand = 0,
+         SendFilesList = 208,
+         Echo,
+         SendFile,
+
+         FilesList,
+         StringValue,
+         StartFilePacket,
+         FilePacket
+     };
+     struct CommandType
+     {
+         CommandType(TCPCommand cmd = NotCommand, const QString& value = "")
+             :cmd(cmd), value(value) {};
+         TCPCommand cmd;
+         QString value;
+     };
+
     TCPHandler(QObject *parent = nullptr,
-               QString workingDirName = QDir::currentPath())
-        : QObject(parent),
-          workingDirName(workingDirName) {};
-    tcp::Command recieveCmd(QIODevice *dev);
+               QString workingDirName = QDir::currentPath());
 
-    bool recieveFilesList(QIODevice *dev, QList<FileInfo> *list);
-    bool recieveString(QIODevice *dev, QString &str);
-    bool recieveFileInfo(QIODevice *dev);
-    bool recieveFileName(QIODevice *dev, QString &name);
-    bool receiveFile(QIODevice *dev);
+    QString getWorkingDirName() const { return  workingDirName; };
+    void    setWorkingDirName(const QString &value) { workingDirName = value; };
 
-    bool sendEchoPacket(QIODevice *dev, const QString &value);
-    bool sendStringPacket(QIODevice *dev, const QString &value);
-    bool sendFilesListRequest(QIODevice *dev);
-    bool sendFilesList(QIODevice *dev, const QList<FileInfo> *list);
-    bool sendFileRequest(QIODevice *dev, const QString &name);
-    bool sendFile(QIODevice *dev, QFile *file, QString &fileShortName);
-
-    bool isCmdHandling() {return commandHandling;};
-    void handleCmd() {commandHandling = true;};
-    void unhandleCmd() {commandHandling = false;};
-
-    tcp::CommandType takeCmdFromQueue()
-    {
-        if (!cmdQueue.isEmpty())
-            return cmdQueue.takeFirst();
-        return tcp::CommandType();
-    };
-    void putCmdToQueue(tcp::CommandType cmd) {cmdQueue.push_back(cmd);};
-
-    virtual bool startNextCmd() {return false;};
 protected:
     FileInfo *fileReceiving = nullptr;
     qint64    remainRFileSize;
     qint64    remainTFileSize;
     int       payLoadSize = 64 * 1024; //64Kb
 
-private:
-    QString   workingDirName;
+    // API for sending/recieving data through tcp
+    //
+    // Packet type
+    TCPCommand recieveCmd(QIODevice *dev);
+    // String
+    bool sendStringPacket(QIODevice *dev, const QString &value);
+    bool recieveString(QIODevice *dev, QString &str);
+    // Echo request
+    bool sendEchoPacket(QIODevice *dev, const QString &value);
+    // FileList at working directory
+    bool sendFilesListRequest(QIODevice *dev);
+    bool sendFilesList(QIODevice *dev, const QList<FileInfo> *list);
+    bool recieveFilesList(QIODevice *dev, QList<FileInfo> *list);
+    // File info
+    bool sendFileRequest(QIODevice *dev, const QString &name);
+    bool recieveFileInfo(QIODevice *dev);
+    bool recieveFileName(QIODevice *dev, QString &name);
+    // File data
+    bool sendFile(QIODevice *dev, QFile *file, QString &fileShortName);
+    bool receiveFile(QIODevice *dev);
 
-    QList<tcp::CommandType> cmdQueue;
+    // Commands are stored at queue and performed one command at time
+    // to lock command queue is using latch
+    CommandType takeCmdFromQueue();
+    void putCmdToQueue(CommandType cmd) { cmdQueue.push_back(cmd); };
+    // Latch for command queue
+    bool isCmdHandling() { return commandHandling; };
+    void handleCmd() { commandHandling = true; };
+    void unhandleCmd() { commandHandling = false; };
+    // Can be overrided to add custom behavior
+    virtual bool startNextCmd();
+
+private:
+    QString workingDirName;
+
+    QList<CommandType> cmdQueue;
     bool commandHandling = false;
 };
 

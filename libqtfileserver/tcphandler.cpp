@@ -1,13 +1,49 @@
 #include "tcphandler.h"
 #include "QDebug"
 
-tcp::Command TCPHandler::recieveCmd(QIODevice *dev)
+TCPHandler::TCPHandler(QObject *parent, QString workingDirName)
+    : QObject(parent),
+      workingDirName(workingDirName)
+{
+
+}
+
+TCPHandler::TCPCommand TCPHandler::recieveCmd(QIODevice *dev)
 {
     int cmd;
     QDataStream stream(dev);
     stream >> cmd;
-    return static_cast<tcp::Command>(cmd);
+    return static_cast<TCPCommand>(cmd);
 }
+
+TCPHandler::CommandType TCPHandler::takeCmdFromQueue()
+{
+    if (!cmdQueue.isEmpty())
+        return cmdQueue.takeFirst();
+    return TCPHandler::CommandType();
+}
+
+bool TCPHandler::startNextCmd()
+{
+    if (isCmdHandling())
+        return false;
+    TCPHandler::CommandType cmdType = takeCmdFromQueue();
+    if (cmdType.cmd == NotCommand)
+        return false;
+    handleCmd();
+// Add custom behavior like this at inheritors
+    switch (cmdType.cmd) {
+//    case SendFilesList:
+//        Send FileList here
+//        break;
+//    case Echo:
+//        Send EchoPacket here
+//        break;
+    default:
+        break;
+    }
+    return true;
+};
 
 bool TCPHandler::recieveString(QIODevice *dev, QString &str)
 {
@@ -32,35 +68,35 @@ bool TCPHandler::recieveFilesList(QIODevice *dev, QList<FileInfo> *list)
 bool TCPHandler::sendEchoPacket(QIODevice *dev, const QString &value)
 {
     QDataStream dataStream(dev);
-    dataStream << static_cast<int>(tcp::Echo) << value;
+    dataStream << static_cast<int>(Echo) << value;
     return true;
 }
 
 bool TCPHandler::sendStringPacket(QIODevice *dev, const QString &value)
 {
     QDataStream dataStream(dev);
-    dataStream << static_cast<int>(tcp::StringValue) << value;
+    dataStream << static_cast<int>(StringValue) << value;
     return true;
 }
 
 bool TCPHandler::sendFilesListRequest(QIODevice *dev)
 {
     QDataStream dataStream(dev);
-    dataStream << static_cast<int>(tcp::SendFilesList);
+    dataStream << static_cast<int>(SendFilesList);
     return true;
 }
 
 bool TCPHandler::sendFilesList(QIODevice *dev, const QList<FileInfo> *list)
 {
     QDataStream dataStream(dev);
-    dataStream << static_cast<int>(tcp::FilesList) << *list;
+    dataStream << static_cast<int>(FilesList) << *list;
     return true;
 }
 
 bool TCPHandler::sendFileRequest(QIODevice *dev, const QString& name)
 {
     QDataStream dataStream(dev);
-    dataStream << static_cast<int>(tcp::SendFile) << name;
+    dataStream << static_cast<int>(SendFile) << name;
     return true;
 }
 
@@ -97,7 +133,7 @@ bool TCPHandler::receiveFile(QIODevice *dev)
 
     if (dev->bytesAvailable() > remainRFileSize)
     {
-        tcp::Command cmd;
+        TCPCommand cmd;
         while (dev->bytesAvailable() > 0) {
             stream >> cmd >> packetSize >> byteArray;
             remainRFileSize -= byteArray.size();
@@ -121,14 +157,14 @@ bool TCPHandler::sendFile(QIODevice *dev, QFile *file, QString &fileShortName)
         return false;
     }
     QDataStream dataStream(dev);
-    dataStream << static_cast<int>(tcp::StartFilePacket)
+    dataStream << static_cast<int>(StartFilePacket)
                 << fileShortName
                 << file->size();
     remainTFileSize = file->size();
     while (!file->atEnd()) {
         qint64 size = remainTFileSize < payLoadSize ? remainTFileSize : payLoadSize;
         remainTFileSize -= size;
-        dataStream << tcp::FilePacket << size << file->read(size);
+        dataStream << FilePacket << size << file->read(size);
         qDebug() << "sended file packet" << size;
     }
     qDebug() << "File" << file->fileName() << "sended" << file->size();

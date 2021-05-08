@@ -15,7 +15,7 @@ class ServerHandler : public TCPHandler
 {
     Q_OBJECT
 public:
-    enum TermCommand {
+    enum class TermCommand {
         SendValue,
         NotCommand,
         Exit

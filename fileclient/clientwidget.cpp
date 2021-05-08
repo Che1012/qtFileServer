@@ -28,9 +28,12 @@ ClientWidget::ClientWidget(QWidget *parent)
     connect(&m_client, &ClientHandler::filePacketReceived,
             this,      &ClientWidget::recievedfilePacket);
 
+    connect(&m_client, &ClientHandler::connectionStatusChanged,
+            this,      &ClientWidget::updateConnectionStatus);
+
     m_ui->treeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(m_ui->treeWidget, &QWidget::customContextMenuRequested,
-            this,             &ClientWidget::showContextMenu);
+            this,             &ClientWidget::showContextMenu);    
     loadSettings();
 }
 
@@ -67,7 +70,11 @@ void ClientWidget::recievedfilePacket(qint64 fileSize, qint64 recievedDataSize)
 
 void ClientWidget::on_connectBtn_clicked()
 {
-    m_client.start(m_ui->ipLineEdit->text(), m_ui->portLineEdit->text().toInt());
+    if (m_client.isConnected())
+        m_client.stop();
+    else
+        m_client.start(m_ui->ipLineEdit->text(),
+                       m_ui->portLineEdit->text().toInt());
 }
 
 void ClientWidget::updateTreeWidget(QList<FileInfo> *fileList)
@@ -212,12 +219,14 @@ void ClientWidget::on_updateFilesBtn_clicked()
     emit sendFilesList();
 }
 
-void ClientWidget::connected()
+void ClientWidget::updateConnectionStatus(bool status)
 {
-
-}
-
-void ClientWidget::disconnected()
-{
-
+    if (status) {
+        m_ui->statusLabel->setText(tr("Connected"));
+        m_ui->connectBtn->setText(tr("Disconnect"));
+    }
+    else {
+        m_ui->statusLabel->setText(tr("Disconnected"));
+        m_ui->connectBtn->setText(tr("Connect"));
+    }
 }
