@@ -112,7 +112,6 @@ bool TCPHandler::recieveFileName(QIODevice *dev, QString &name)
 
 bool TCPHandler::receiveFile(QIODevice *dev)
 {
-    // TO-DO rework this terrible file receiving
     QFile file(workingDirName + "/" + fileReceiving->getName());
 
     if (!file.open(QFile::Append))
@@ -130,22 +129,6 @@ bool TCPHandler::receiveFile(QIODevice *dev)
     file.write(byteArray);
     emit filePacketReceived(fileReceiving->getSize(),
                             fileReceiving->getSize() - remainRFileSize);
-
-    if (dev->bytesAvailable() > remainRFileSize)
-    {
-        TCPCommand cmd;
-        while (dev->bytesAvailable() > 0) {
-            stream >> cmd >> packetSize >> byteArray;
-            remainRFileSize -= byteArray.size();
-            qDebug() << "bytes available" << dev->bytesAvailable();
-            qDebug() << "received filePacket";
-            qDebug() << "expected" << packetSize << "received" << byteArray.size()
-                     << "remaining" << remainRFileSize;
-            file.write(byteArray);
-            emit filePacketReceived(fileReceiving->getSize(),
-                                    fileReceiving->getSize() - remainRFileSize);
-        }
-    }
     file.close();
     return true;
 }

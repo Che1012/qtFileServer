@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QtNetwork/QTcpSocket>
+#include <QTimer>
 
 #include "fileinfo.h"
 #include "tcphandler.h"
@@ -18,6 +19,7 @@ public:
     bool isConnected();
 
     bool startNextCmd() override;
+
 signals:
     void finished();
     void received(QString data);
@@ -36,8 +38,12 @@ public slots:
 
     void acceptConnection();
     void closeConnection();
+
+    void onTimeout();
+
 private:
     QTcpSocket *m_tcpSocket;
+    QTimer m_timeoutTimer;
 };
 
 

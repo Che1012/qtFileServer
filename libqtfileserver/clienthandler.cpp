@@ -15,6 +15,8 @@ void ClientHandler::start(const QString &ip, const int port)
             this, &ClientHandler::acceptConnection);
     connect(m_tcpSocket, &QAbstractSocket::disconnected,
             this, &ClientHandler::closeConnection);
+    connect(&m_timeoutTimer, &QTimer::timeout,
+            this, &ClientHandler::onTimeout);
 }
 
 void ClientHandler::stop()
@@ -69,6 +71,7 @@ void ClientHandler::receiveData()
         emit received("Tcp request is wrong");
         break;
     }
+    m_timeoutTimer.start();
 }
 
 void ClientHandler::sendEcho(QString value)
@@ -99,6 +102,12 @@ void ClientHandler::closeConnection()
     emit connectionStatusChanged(false);
 }
 
+void ClientHandler::onTimeout()
+{
+    while(m_tcpSocket->bytesAvailable() > 0)
+        receiveData();
+}
+
 bool ClientHandler::startNextCmd()
 {
     if (isCmdHandling())
@@ -124,9 +133,12 @@ bool ClientHandler::startNextCmd()
 }
 
 ClientHandler::ClientHandler(QObject *parent)
-    : TCPHandler(parent)
+    : TCPHandler(parent), m_timeoutTimer(this)
 {
     m_tcpSocket = new QTcpSocket();
+
+    m_timeoutTimer.setSingleShot(true);
+    m_timeoutTimer.setInterval(100);
 }
 
 ClientHandler::~ClientHandler()

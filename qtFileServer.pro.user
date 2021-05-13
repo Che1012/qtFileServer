@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 4.14.1, 2021-04-30T16:20:22. -->
+<!-- Written by QtCreator 4.14.1, 2021-05-10T12:46:19. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -64,7 +64,11 @@
     <value type="bool" key="AutoTest.Framework.QtQuickTest">false</value>
     <value type="bool" key="AutoTest.Framework.QtTest">true</value>
    </valuemap>
-   <valuemap type="QVariantMap" key="AutoTest.CheckStates"/>
+   <valuemap type="QVariantMap" key="AutoTest.CheckStates">
+    <value type="Qt::CheckState" key="/home/timin/source/qtFileServer/test/test_fileinfo.cpp:Test_FileInfo">Checked</value>
+    <value type="Qt::CheckState" key="/home/timin/source/qtFileServer/test/test_fileinfo.cpp:getFilePath">Checked</value>
+    <value type="Qt::CheckState" key="/home/timin/source/qtFileServer/test/test_fileinfo.cpp:isUpToDate">Checked</value>
+   </valuemap>
    <value type="int" key="AutoTest.RunAfterBuild">2</value>
    <value type="bool" key="AutoTest.UseGlobal">false</value>
    <valuelist type="QVariantList" key="ClangCodeModel.CustomCommandLineKey"/>
