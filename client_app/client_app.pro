@@ -14,13 +14,19 @@ CONFIG += c++11
 SOURCES += \
     main.cpp \
     clientwidget.cpp \
+    mainwindow.cpp \
+    serverwidget.cpp
 
 HEADERS += \
     clienthandler.h \
     clientwidget.h \
+    mainwindow.h \
+    serverwidget.h
 
 FORMS += \
-    clientwidget.ui
+    clientwidget.ui \
+    mainwindow.ui \
+    serverwidget.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

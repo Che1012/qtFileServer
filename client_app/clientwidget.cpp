@@ -3,7 +3,6 @@
 #include <QMenu>
 #include <QSettings>
 
-
 #include "clientwidget.h"
 #include "ui_clientwidget.h"
 
@@ -35,12 +34,14 @@ ClientWidget::ClientWidget(QWidget *parent)
     connect(m_ui->treeWidget, &QWidget::customContextMenuRequested,
             this,             &ClientWidget::showContextMenu);    
     loadSettings();
+    qDebug() << "client widget created";
 }
 
 ClientWidget::~ClientWidget()
 {
     saveSettings();
     delete m_ui;
+    qDebug() << "client widget deleted";
 }
 
 void ClientWidget::saveSettings()

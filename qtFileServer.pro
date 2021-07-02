@@ -2,20 +2,20 @@ TEMPLATE = subdirs
 
 CONFIG += testcase
 
-SUBDIRS = client    \
-          server    \
+SUBDIRS = client_app    \
+          client_cmd    \
           lib       \
           test      \
 
-client.subdir = fileclient
-server.subdir = fileserver
+client_app.subdir = client_app
+client_cmd.subdir = client_cmd
 lib.subdir = libqtfileserver
 test.subdir = test
 
-client.depends = lib
-server.depends = lib
+client_app.depends = lib
+client_cmd.depends = lib
 
-test.depends = lib client server
+test.depends = lib client_app client_cmd
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
