@@ -23,12 +23,16 @@ public:
     TermCommand toCommand(const QString &cmd);
 
     explicit ServerHandler(QObject* parent = nullptr,
-                           QString filesDirPath = QDir::currentPath());
-    void init();
+                           const QString &filesDirPath = QDir::currentPath());
     ~ServerHandler();
+
+    void init();
 
 signals:
     void finished();
+
+    void connected(const QString &info);
+    void disconnected(const QString &info);
 
 public slots:
     void start();
@@ -45,6 +49,10 @@ private:
     QTcpServer      *m_tcpServer = nullptr;
     QTcpSocket      *m_tcpServerConnection = nullptr;
     QSocketNotifier *m_input = nullptr;
+
+    QString formatConnectionInfo(const QString& name,
+                                 const QString& ip,
+                                 quint16 port);
 };
 
 
