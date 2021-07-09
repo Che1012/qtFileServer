@@ -43,7 +43,7 @@ public slots:
     void displayError(QAbstractSocket::SocketError socketError);
     void onClientDisconnect();
 
-    void checkCommand();
+//    void checkCommand();
 
 private:
     QTcpServer      *m_tcpServer = nullptr;

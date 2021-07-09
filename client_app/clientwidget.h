@@ -23,6 +23,7 @@ public:
         Status
     };
     const int CHILD_NOT_FOUND = -1;
+    const int DEFAULT_PORT = 6060;
 
     ClientWidget(QWidget *parent = nullptr);
     ~ClientWidget();
@@ -47,11 +48,13 @@ private slots:
     void on_syncBtn_clicked();
     void on_updateFilesBtn_clicked();
 
+    void on_browseBtn_clicked();
+
 private:
     Ui::ClientWidget *m_ui;
     ClientHandler m_client;
-    QList<FileInfo>* currFileInfoList = nullptr;
-    QList<FileInfo>* filesAtClientList = nullptr;
+    QList<FileInfo> *m_currFileInfoList = nullptr;
+    QList<FileInfo> *m_filesAtClientList = nullptr;
 
     // FileTree
     bool checkTreeNode(QList<FileInfo> *list, const FileInfo &node);

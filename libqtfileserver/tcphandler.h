@@ -38,14 +38,14 @@ public:
     TCPHandler(QObject *parent = nullptr,
                QString workingDirName = QDir::currentPath());
 
-    QString getWorkingDirName() const { return  workingDirName; };
-    void    setWorkingDirName(const QString &value) { workingDirName = value; };
+    QString getWorkingDirName() const { return  m_workingDirName; };
+    void    setWorkingDirName(const QString &value) { m_workingDirName = value; };
 
 protected:
-    FileInfo *fileReceiving = nullptr;
-    qint64    remainRFileSize;
-    qint64    remainTFileSize;
-    int       payLoadSize = 64 * 1024; //64Kb
+    FileInfo *m_fileReceiving = nullptr;
+    qint64    m_remainRFileSize;
+    qint64    m_remainTFileSize;
+    int       m_payLoadSize = 64 * 1024; //64Kb
 
     // API for sending/recieving data through tcp
     //
@@ -71,19 +71,20 @@ protected:
     // Commands are stored at queue and performed one command at time
     // to lock command queue is using latch
     CommandType takeCmdFromQueue();
-    void putCmdToQueue(CommandType cmd) { cmdQueue.push_back(cmd); };
+    void putCmdToQueue(CommandType cmd) { m_cmdQueue.push_back(cmd); };
     // Latch for command queue
-    bool isCmdHandling() { return commandHandling; };
-    void handleCmd() { commandHandling = true; };
-    void unhandleCmd() { commandHandling = false; };
+    bool isCmdHandling() { return m_commandHandling; };
+    void handleCmd() { m_commandHandling = true; };
+    void unhandleCmd() { m_commandHandling = false; };
     // Can be overrided to add custom behavior
     virtual bool startNextCmd();
 
 private:
-    QString workingDirName;
+    QString m_workingDirName;
 
-    QList<CommandType> cmdQueue;
-    bool commandHandling = false;
+    QList<CommandType> m_cmdQueue;
+
+    bool m_commandHandling = false;
 };
 
 #endif // TCPHANDLER_H

@@ -2,6 +2,7 @@
 #include <QDir>
 #include <QMenu>
 #include <QSettings>
+#include <QFileDialog>
 
 #include "clientwidget.h"
 #include "ui_clientwidget.h"
@@ -58,8 +59,12 @@ void ClientWidget::loadSettings()
     QSettings settings("OpenSoft", "QtFileServer");
 
     m_ui->ipLineEdit->setText(settings.value("client/ipLineEdit").toString());
-    m_ui->portLineEdit->setText(settings.value("client/portLineEdit").toString());
     m_ui->dirLineEdit->setText(settings.value("client/dirLineEdit").toString());
+
+    QString text = settings.value("client/portLineEdit").toString();
+    if (text.isEmpty())
+        text = QString::number(DEFAULT_PORT);
+    m_ui->portLineEdit->setText(text);
 }
 
 void ClientWidget::recievedfilePacket(qint64 fileSize, qint64 recievedDataSize)
@@ -81,25 +86,25 @@ void ClientWidget::on_connectBtn_clicked()
 void ClientWidget::updateTreeWidget(QList<FileInfo> *fileList)
 {
     qDebug() << "updating treeWidget";
-    if (currFileInfoList != nullptr)
-        delete currFileInfoList;
-    currFileInfoList = fileList;
+    if (m_currFileInfoList != nullptr)
+        delete m_currFileInfoList;
+    m_currFileInfoList = fileList;
     /////TO-DO Replace
     m_client.setWorkingDirName(m_ui->dirLineEdit->text());
     /////
 
-    if (filesAtClientList != nullptr)
-        delete filesAtClientList;
-    filesAtClientList = new QList<FileInfo>;
-    FileInfo::getFilesList(filesAtClientList, m_ui->dirLineEdit->text(), "");
+    if (m_filesAtClientList != nullptr)
+        delete m_filesAtClientList;
+    m_filesAtClientList = new QList<FileInfo>;
+    FileInfo::getFilesList(m_filesAtClientList, m_ui->dirLineEdit->text(), "");
 
     QTreeWidgetItem* treeRoot = m_ui->treeWidget->takeTopLevelItem(0);
     if (treeRoot != nullptr)
         delete treeRoot;
     treeRoot = new QTreeWidgetItem(m_ui->treeWidget);
 
-    for (int i = 0; i < currFileInfoList->size(); i++)
-            if (!addTreeNode(treeRoot, currFileInfoList->at(i), 0))
+    for (int i = 0; i < m_currFileInfoList->size(); i++)
+            if (!addTreeNode(treeRoot, m_currFileInfoList->at(i), 0))
                 qDebug() << "Error at creating tree";
     treeRoot->setExpanded(true);
 }
@@ -134,7 +139,7 @@ bool ClientWidget::addTreeNode(QTreeWidgetItem* parent,
         item->setText(Column::Name, nodeSubName);
         item->setText(Column::Size, QString::number(node.getSize()));
         item->setText(Column::Date, node.getDate().toString());
-        if (checkTreeNode(filesAtClientList, node))
+        if (checkTreeNode(m_filesAtClientList, node))
             item->setText(Column::Status, "Up to date");
         else
             item->setText(Column::Status, "Need update");
@@ -211,11 +216,11 @@ void ClientWidget::showContextMenu(const QPoint &pos)
 
 void ClientWidget::on_updateFilesBtn_clicked()
 {
-    if (!currFileInfoList || !filesAtClientList)
+    if (!m_currFileInfoList || !m_filesAtClientList)
         return;
-    for (int i = 0; i < currFileInfoList->size(); i++) {
-        if (!checkTreeNode(filesAtClientList, currFileInfoList->at(i)))
-            updateTreeNode(currFileInfoList->at(i).getName());
+    for (int i = 0; i < m_currFileInfoList->size(); i++) {
+        if (!checkTreeNode(m_currFileInfoList, m_currFileInfoList->at(i)))
+            updateTreeNode(m_currFileInfoList->at(i).getName());
     }
     emit sendFilesList();
 }
@@ -231,3 +236,18 @@ void ClientWidget::updateConnectionStatus(bool status)
         m_ui->connectBtn->setText(tr("Connect"));
     }
 }
+
+void ClientWidget::on_browseBtn_clicked()
+{
+    QString path = m_ui->dirLineEdit->text();
+    if (path.isEmpty() || !QDir(path).exists())
+        path = m_client.getWorkingDirName();
+    QFileDialog dialog(this, tr("Updated directory"), path);
+    dialog.setFileMode(QFileDialog::DirectoryOnly);
+    QString dirName;
+    if (dialog.exec())
+        dirName = dialog.selectedFiles()[0];
+    m_ui->dirLineEdit->setText(dirName);
+
+}
+

@@ -23,9 +23,16 @@ private slots:
     void addConnectionInfo(const QString &info);
     void removeConnectionInfo(const QString &info);
 
+    void saveSettings();
+    void loadSettings();
+
+    void on_pathLine_editingFinished();
+
+    void on_browseBtn_clicked();
+
 private:
     Ui::ServerWidget *m_ui;
-    ServerHandler *m_server;
+    ServerHandler *m_server = nullptr;
 
 };
 

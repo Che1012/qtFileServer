@@ -1,4 +1,6 @@
 #include <QDebug>
+#include <QSettings>
+#include <QFileDialog>
 
 #include "serverwidget.h"
 #include "ui_serverwidget.h"
@@ -8,12 +10,13 @@ ServerWidget::ServerWidget(QWidget *parent) :
     m_ui(new Ui::ServerWidget)
 {
     m_ui->setupUi(this);
-
+    loadSettings();
     qDebug() << "server widget created";
 }
 
 ServerWidget::~ServerWidget()
 {
+    saveSettings();
     delete m_ui;
     qDebug() << "server widget deleted";
 }
@@ -51,3 +54,41 @@ void ServerWidget::removeConnectionInfo(const QString &info)
     }
     m_ui->listWidget->takeItem(m_ui->listWidget->row(list[0]));
 }
+
+void ServerWidget::saveSettings()
+{
+    QSettings settings("OpenSoft", "QtFileServer");
+
+    settings.setValue("server/pathLine", m_ui->pathLine->text());
+}
+
+void ServerWidget::loadSettings()
+{
+    QSettings settings("OpenSoft", "QtFileServer");
+
+    m_ui->pathLine->setText(settings.value("server/pathLine").toString());
+}
+
+void ServerWidget::on_pathLine_editingFinished()
+{
+    m_server->setWorkingDirName(m_ui->pathLine->text());
+}
+
+void ServerWidget::on_browseBtn_clicked()
+{
+    QString path = m_ui->pathLine->text();
+    if (path.isEmpty() || !QDir(path).exists())
+    {
+        if (m_server)
+            path = m_server->getWorkingDirName();
+        else
+            path = "";
+    }
+    QFileDialog dialog(this, tr("Updated directory"), path);
+    dialog.setFileMode(QFileDialog::DirectoryOnly);
+    QString dirName;
+    if (dialog.exec())
+        dirName = dialog.selectedFiles()[0];
+    m_ui->pathLine->setText(dirName);
+}
+

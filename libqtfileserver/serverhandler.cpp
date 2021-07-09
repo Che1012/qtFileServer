@@ -92,29 +92,29 @@ void ServerHandler::onClientDisconnect()
     qDebug() << "Server started to listen for a connection";
 }
 
-void ServerHandler::checkCommand()
-{
-    QTextStream stream(stdin);
-    QString cmd;
-    QString value;
-    stream >> cmd;
-    TermCommand command = toCommand(cmd);
+//void ServerHandler::checkCommand()
+//{
+//    QTextStream stream(stdin);
+//    QString cmd;
+//    QString value;
+//    stream >> cmd;
+//    TermCommand command = toCommand(cmd);
 
-    switch (command) {
-    case TermCommand::SendValue:
-        stream >> value;
-        sendStringPacket(m_tcpServerConnection, value);
-        break;
-    case TermCommand::Exit:
-        stop();
-        break; 
-    case TermCommand::NotCommand:
-        qDebug() << "Not a command, try another one..";
-        break;
-    }
+//    switch (command) {
+//    case TermCommand::SendValue:
+//        stream >> value;
+//        sendStringPacket(m_tcpServerConnection, value);
+//        break;
+//    case TermCommand::Exit:
+//        stop();
+//        break;
+//    case TermCommand::NotCommand:
+//        qDebug() << "Not a command, try another one..";
+//        break;
+//    }
 
-    qDebug() << "Command" << cmd << value;
-}
+//    qDebug() << "Command" << cmd << value;
+//}
 
 QString ServerHandler::formatConnectionInfo(const QString &name, const QString &ip, quint16 port)
 {
@@ -131,10 +131,10 @@ void ServerHandler::init()
     connect(m_tcpServer, &QTcpServer::newConnection,
             this, &ServerHandler::acceptConnection);
 
-    m_input = new QSocketNotifier(fileno(stdin), QSocketNotifier::Read, this);
+//    m_input = new QSocketNotifier(fileno(stdin), QSocketNotifier::Read, this);
 
-    QObject::connect(m_input, &QSocketNotifier::activated,
-                     this, &ServerHandler::checkCommand);
+//    QObject::connect(m_input, &QSocketNotifier::activated,
+//                     this, &ServerHandler::checkCommand);
 }
 
 ServerHandler::TermCommand ServerHandler::toCommand(const QString &cmd)

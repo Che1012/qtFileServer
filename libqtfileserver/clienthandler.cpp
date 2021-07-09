@@ -17,6 +17,7 @@ void ClientHandler::start(const QString &ip, const int port)
             this, &ClientHandler::closeConnection);
     connect(&m_timeoutTimer, &QTimer::timeout,
             this, &ClientHandler::onTimeout);
+    qDebug() << "Started connection to the server";
 }
 
 void ClientHandler::stop()
@@ -47,7 +48,7 @@ void ClientHandler::receiveData()
     }
     case StartFilePacket: {
         recieveFileInfo(m_tcpSocket);
-        fileReceiving->createEmptyFile(getWorkingDirName());
+        m_fileReceiving->createEmptyFile(getWorkingDirName());
         break;
     }
     case FilesList: {
@@ -60,8 +61,8 @@ void ClientHandler::receiveData()
     }
     case FilePacket: {
         receiveFile(m_tcpSocket);
-        if (remainRFileSize <= 0) {
-            delete fileReceiving;
+        if (m_remainRFileSize <= 0) {
+            delete m_fileReceiving;
             unhandleCmd();
             startNextCmd();
         }
@@ -145,8 +146,8 @@ ClientHandler::~ClientHandler()
 {
     if (!m_tcpSocket)
         delete m_tcpSocket;
-    if (!fileReceiving)
-        delete fileReceiving;
+    if (!m_fileReceiving)
+        delete m_fileReceiving;
 }
 
 bool ClientHandler::isConnected()

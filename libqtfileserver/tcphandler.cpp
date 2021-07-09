@@ -3,7 +3,7 @@
 
 TCPHandler::TCPHandler(QObject *parent, QString workingDirName)
     : QObject(parent),
-      workingDirName(workingDirName)
+      m_workingDirName(workingDirName)
 {
 
 }
@@ -18,8 +18,8 @@ TCPHandler::TCPCommand TCPHandler::recieveCmd(QIODevice *dev)
 
 TCPHandler::CommandType TCPHandler::takeCmdFromQueue()
 {
-    if (!cmdQueue.isEmpty())
-        return cmdQueue.takeFirst();
+    if (!m_cmdQueue.isEmpty())
+        return m_cmdQueue.takeFirst();
     return TCPHandler::CommandType();
 }
 
@@ -112,7 +112,7 @@ bool TCPHandler::recieveFileName(QIODevice *dev, QString &name)
 
 bool TCPHandler::receiveFile(QIODevice *dev)
 {
-    QFile file(workingDirName + "/" + fileReceiving->getName());
+    QFile file(m_workingDirName + "/" + m_fileReceiving->getName());
 
     if (!file.open(QFile::Append))
         return false;
@@ -122,13 +122,13 @@ bool TCPHandler::receiveFile(QIODevice *dev)
     QByteArray byteArray;
     stream >> packetSize >> byteArray;
     qDebug() << "bytes available" << dev->bytesAvailable();
-    remainRFileSize -= byteArray.size();
+    m_remainRFileSize -= byteArray.size();
     qDebug() << "received filePacket";
     qDebug() << "expected" << packetSize << "received" << byteArray.size()
-             << "remaining" << remainRFileSize;
+             << "remaining" << m_remainRFileSize;
     file.write(byteArray);
-    emit filePacketReceived(fileReceiving->getSize(),
-                            fileReceiving->getSize() - remainRFileSize);
+    emit filePacketReceived(m_fileReceiving->getSize(),
+                            m_fileReceiving->getSize() - m_remainRFileSize);
     file.close();
     return true;
 }
@@ -143,10 +143,10 @@ bool TCPHandler::sendFile(QIODevice *dev, QFile *file, QString &fileShortName)
     dataStream << static_cast<int>(StartFilePacket)
                 << fileShortName
                 << file->size();
-    remainTFileSize = file->size();
+    m_remainTFileSize = file->size();
     while (!file->atEnd()) {
-        qint64 size = remainTFileSize < payLoadSize ? remainTFileSize : payLoadSize;
-        remainTFileSize -= size;
+        qint64 size = m_remainTFileSize < m_payLoadSize ? m_remainTFileSize : m_payLoadSize;
+        m_remainTFileSize -= size;
         dataStream << FilePacket << size << file->read(size);
         qDebug() << "sended file packet" << size;
     }
@@ -162,8 +162,8 @@ bool TCPHandler::recieveFileInfo(QIODevice *dev)
     qint64 fileSize;
     QDataStream dataStream(dev);
     dataStream >> fileName >> fileSize;
-    fileReceiving = new FileInfo(fileName, fileSize);
-    remainRFileSize = fileSize;
+    m_fileReceiving = new FileInfo(fileName, fileSize);
+    m_remainRFileSize = fileSize;
 
     qDebug() << "recieveFileInfo:" << fileName << fileSize;
     return true;
