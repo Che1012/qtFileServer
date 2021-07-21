@@ -12,9 +12,6 @@ class TCPHandler : public QObject
 {
 Q_OBJECT
 
-signals:
-     void filePacketReceived(qint64 fileSize, qint64 recievedDataSize);
-
 public:
      enum TCPCommand {
          NotCommand = 0,
@@ -40,6 +37,9 @@ public:
 
     QString getWorkingDirName() const { return  m_workingDirName; };
     void    setWorkingDirName(const QString &value) { m_workingDirName = value; };
+
+signals:
+     void filePacketReceived(qint64 fileSize, qint64 recievedDataSize);
 
 protected:
     FileInfo *m_fileReceiving = nullptr;
