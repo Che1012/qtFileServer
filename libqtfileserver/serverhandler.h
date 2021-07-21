@@ -16,8 +16,9 @@ class ServerHandler : public TCPHandler
     Q_OBJECT
 public:
     enum class TermCommand {
-        SendValue,
+        Echo,
         NotCommand,
+        Help,
         Exit
     };
     TermCommand toCommand(const QString &cmd);
@@ -43,7 +44,7 @@ public slots:
     void displayError(QAbstractSocket::SocketError socketError);
     void onClientDisconnect();
 
-//    void checkCommand();
+    void checkCommand();
 
 private:
     QTcpServer      *m_tcpServer = nullptr;

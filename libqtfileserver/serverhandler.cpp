@@ -5,12 +5,12 @@
 void ServerHandler::start()
 {
     m_tcpServer->listen(QHostAddress::LocalHost, 6060);
-    qDebug() << "Server started to listen for a connection";
+    QTextStream(stdout) << "Server started to listen for a connection\n";
 }
 
 void ServerHandler::stop()
 {
-   qDebug() << "ServerHandler stopped";
+   QTextStream(stdout) << "ServerHandler stopped\n";
    if (m_tcpServerConnection->isOpen())
        m_tcpServerConnection->close();
    emit finished();
@@ -32,7 +32,7 @@ void ServerHandler::acceptConnection()
                                        m_tcpServerConnection->peerAddress().toString(),
                                        m_tcpServerConnection->peerPort());
    emit connected(info);
-   qDebug("Accepted connection");
+   QTextStream(stdout) << "Accepted connection\n";
    m_tcpServer->close();
 }
 
@@ -87,34 +87,40 @@ void ServerHandler::onClientDisconnect()
     emit disconnected(info);
     m_tcpServerConnection->deleteLater();
     m_tcpServerConnection = nullptr;
-    qDebug() << "Client disconnected";
+    QTextStream(stdout) << "Client disconnected\n";
     m_tcpServer->listen(QHostAddress::LocalHost, 6060);
-    qDebug() << "Server started to listen for a connection";
+    QTextStream(stdout) << "Server started to listen for a connection\n";
 }
 
-//void ServerHandler::checkCommand()
-//{
-//    QTextStream stream(stdin);
-//    QString cmd;
-//    QString value;
-//    stream >> cmd;
-//    TermCommand command = toCommand(cmd);
+void ServerHandler::checkCommand()
+{
+    QTextStream stream(stdin);
+    QString cmd;
+    QString value;
+    stream >> cmd;
+    TermCommand command = toCommand(cmd);
 
-//    switch (command) {
-//    case TermCommand::SendValue:
-//        stream >> value;
-//        sendStringPacket(m_tcpServerConnection, value);
-//        break;
-//    case TermCommand::Exit:
-//        stop();
-//        break;
-//    case TermCommand::NotCommand:
-//        qDebug() << "Not a command, try another one..";
-//        break;
-//    }
+    switch (command) {
+    case TermCommand::Help:
+        QTextStream(stdout) << "Commands:\n"
+                            << "/h /help - show help\n"
+                            << "/echo [value] - send echo to client\n"
+                            << "/exit - stop the server and exit from the program\n";
+        break;
+    case TermCommand::Echo:
+        stream >> value;
+        sendEchoPacket(m_tcpServerConnection, value);
+        break;
+    case TermCommand::Exit:
+        stop();
+        break;
+    case TermCommand::NotCommand:
+        QTextStream(stdout) << "Not a command, try another one..\n";
+        break;
+    }
 
-//    qDebug() << "Command" << cmd << value;
-//}
+    qDebug() << "Command from terminal:" << cmd << value;
+}
 
 QString ServerHandler::formatConnectionInfo(const QString &name, const QString &ip, quint16 port)
 {
@@ -130,19 +136,17 @@ void ServerHandler::init()
     m_tcpServer = new QTcpServer();
     connect(m_tcpServer, &QTcpServer::newConnection,
             this, &ServerHandler::acceptConnection);
-
-//    m_input = new QSocketNotifier(fileno(stdin), QSocketNotifier::Read, this);
-
-//    QObject::connect(m_input, &QSocketNotifier::activated,
-//                     this, &ServerHandler::checkCommand);
 }
 
 ServerHandler::TermCommand ServerHandler::toCommand(const QString &cmd)
 {
-    if (cmd == "send")
-        return TermCommand::SendValue;
-    if (cmd == "exit")
+    if (cmd == "\echo")
+        return TermCommand::Echo;
+    if (cmd == "\help" || cmd == "\h")
+        return TermCommand::Help;
+    if (cmd == "\exit")
         return TermCommand::Exit;
+
     return TermCommand::NotCommand;
 }
 
